@@ -3,6 +3,7 @@ import type { BattleOption } from "@/lib/battle-types";
 import { normalizeBattleOptions } from "@/lib/food-option-catalog";
 
 export type BattleSetupInput = {
+  idea: string;
   maxPortions: number;
   availableHours: string;
   foodCostPct: number;
@@ -105,7 +106,7 @@ export async function generateBattleSetup(input: BattleSetupInput): Promise<Batt
     return { ...FALLBACK_RESULT, options: normalizeBattleOptions(FALLBACK_RESULT.options) };
   }
 
-  const systemPrompt = `You are a restaurant demand-validation assistant. Generate exactly 4 food-forward menu special options based on owner constraints. The options should feel like appetising cafe or dessert specials, with a mix of savoury plates and sweets when suitable. Return ONLY valid JSON with this shape:
+  const systemPrompt = `You are a restaurant demand-validation assistant. Generate exactly 4 menu special options based on owner constraints and the owner's idea. The options should feel like appetising cafe, brunch, lunch or dessert specials, with a mix of savoury plates and sweets when suitable. Return ONLY valid JSON with this shape:
 {
   "question": "clear business question the battle answers",
   "options": [
@@ -115,7 +116,10 @@ export async function generateBattleSetup(input: BattleSetupInput): Promise<Batt
 }
 All options must be operationally feasible, feel like real menu specials, and use prices in GBP.`;
 
-  const userPrompt = `Constraints:
+  const userPrompt = `Owner idea:
+${input.idea?.trim() ? input.idea.trim() : "No specific idea provided. Use your judgement to propose a strong battle."}
+
+Constraints:
 - Max portions: ${input.maxPortions}
 - Available hours: ${input.availableHours}
 - Food cost target: ${input.foodCostPct}%
@@ -124,7 +128,7 @@ All options must be operationally feasible, feel like real menu specials, and us
 - Staffing cost per hour: £${input.staffingCostPerHour}
 - Service hours: ${input.serviceHours}
 
-Create 4 realistic specials for one campaign. Make at least 2 sweet options if the concept allows it.`;
+Create 4 realistic specials for one campaign. If the owner's idea is specific, keep the options aligned with it. Make at least 2 sweet options if the concept allows it.`;
 
   try {
     const result = await chatWithOpenRouter(

@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
+import { chatWithOpenRouter } from "@/lib/openrouter";
 import { computeAllMetrics, getWinningOptionId } from "@/lib/battle-score";
 import { normalizeBattleOptions } from "@/lib/food-option-catalog";
 import type {
@@ -14,6 +15,7 @@ import type {
   PublicBattle,
   PublicBusiness,
   ResponseRecord,
+  OwnerBattleInsight,
   Verdict,
   WaitlistRecord,
 } from "@/lib/battle-types";
@@ -91,6 +93,8 @@ function toPublicBattle(record: BattleRecord, business?: PublicBusiness): Public
     staffingCost: record.staffingCost,
     wastageAllowance: record.wastageAllowance,
     options: normalizeBattleOptions(record.options),
+    allowReservation: record.allowReservation,
+    allowPreorder: record.allowPreorder,
     winnerOptionId: record.winnerOptionId,
     unlockThreshold: record.unlockThreshold,
     unlockBonus: record.unlockBonus,
@@ -271,6 +275,8 @@ type CreateBattleInput = {
   staffingCost: number;
   wastageAllowance: number;
   options: BattleOption[];
+  allowReservation?: boolean;
+  allowPreorder?: boolean;
   unlockThreshold?: number;
   unlockBonus?: string;
   status?: BattleStatus;
@@ -309,6 +315,8 @@ export async function createBattle(input: CreateBattleInput) {
     staffingCost: input.staffingCost,
     wastageAllowance: input.wastageAllowance,
     options: normalizeBattleOptions(input.options),
+    allowReservation: input.allowReservation,
+    allowPreorder: input.allowPreorder,
     unlockThreshold: input.unlockThreshold,
     unlockBonus: input.unlockBonus,
     createdAt: new Date(),
@@ -394,6 +402,161 @@ export async function getPublicBattleStats(shortCode: string) {
   const metrics = computeAllMetrics(battle.options, responses);
 
   return { battle, metrics, totalResponses: responses.length };
+}
+
+type OwnerBattleSnapshot = {
+  id: string;
+  shortCode: string;
+  question: string;
+  status: BattleStatus;
+  serviceDate: string;
+  serviceWindow: string;
+  totalResponses: number;
+  totalVotes: number;
+  totalRegistered: number;
+  totalReserved: number;
+  totalDeposited: number;
+  topOptionName: string | null;
+  topOptionBookings: number;
+  allowReservation?: boolean;
+  allowPreorder?: boolean;
+};
+
+function buildFallbackOwnerInsight(battles: OwnerBattleSnapshot[]): OwnerBattleInsight {
+  const liveCount = battles.filter((battle) => battle.status === "live").length;
+  const totalResponses = battles.reduce((sum, battle) => sum + battle.totalResponses, 0);
+  const totalVotes = battles.reduce((sum, battle) => sum + battle.totalVotes, 0);
+  const totalReserved = battles.reduce((sum, battle) => sum + battle.totalReserved, 0);
+  const totalDeposited = battles.reduce((sum, battle) => sum + battle.totalDeposited, 0);
+  const reservationShare = totalResponses > 0 ? totalReserved / totalResponses : 0;
+  const depositShare = totalResponses > 0 ? totalDeposited / totalResponses : 0;
+  const strongestBattle = [...battles].sort(
+    (a, b) => b.totalDeposited + b.totalReserved - (a.totalDeposited + a.totalReserved),
+  )[0];
+
+  return {
+    summary:
+      battles.length === 0
+        ? "You have not launched any battles yet."
+        : `You have ${battles.length} battles, ${liveCount} live, and ${totalResponses} total responses. People are voting, but only a smaller share is moving into reservations and deposits. Focus on making the next step feel easier and more valuable.`,
+    voterBehavior: [
+      `Most people start with a vote (${totalVotes} total votes across your battles).`,
+      `Only ${Math.round(reservationShare * 100)}% of responses turn into reservations, so many customers stop before commitment.`,
+      `Deposits are at ${Math.round(depositShare * 100)}% of responses, which means the strongest teams need a clearer push.`,
+    ],
+    whatToDo: [
+      "Keep the winning option obvious and repeat the value in simple words.",
+      "Make the reservation or deposit step feel faster and more optional when interest is low.",
+      "Push the best-performing battle more aggressively and reuse its wording style.",
+    ],
+    risks: [
+      strongestBattle
+        ? `Your strongest battle is ${strongestBattle.question}. If that one slows down, overall momentum will drop quickly.`
+        : "There is not enough activity yet to spot a strong winner.",
+      "If voters keep stopping after the first tap, the follow-up steps need less friction.",
+    ],
+    strongestSignal: strongestBattle
+      ? `${strongestBattle.topOptionName ?? "One team"} is leading on ${strongestBattle.topOptionBookings} committed bookings in "${strongestBattle.question}".`
+      : "No strong signal yet.",
+  };
+}
+
+async function getOwnerBattleSnapshots(ownerId: string) {
+  const battles = await getBattlesByOwner(ownerId);
+
+  const snapshots = await Promise.all(
+    battles.map(async (battle) => {
+      const responses = await getResponsesForBattle(battle.id);
+      const metrics = computeAllMetrics(battle.options, responses);
+      const leading = [...metrics].sort((a, b) => b.deposited + b.reserved - (a.deposited + a.reserved))[0];
+      const topOptionName = battle.options.find((option) => option.id === leading?.optionId)?.name ?? null;
+
+      return {
+        id: battle.id,
+        shortCode: battle.shortCode,
+        question: battle.question,
+        status: battle.status,
+        serviceDate: battle.serviceDate,
+        serviceWindow: battle.serviceWindow,
+        totalResponses: responses.length,
+        totalVotes: metrics.reduce((sum, metric) => sum + metric.votes, 0),
+        totalRegistered: metrics.reduce((sum, metric) => sum + metric.registered, 0),
+        totalReserved: metrics.reduce((sum, metric) => sum + metric.reserved, 0),
+        totalDeposited: metrics.reduce((sum, metric) => sum + metric.deposited, 0),
+        topOptionName,
+        topOptionBookings: (leading?.reserved ?? 0) + (leading?.deposited ?? 0),
+        allowReservation: battle.allowReservation,
+        allowPreorder: battle.allowPreorder,
+      };
+    }),
+  );
+
+  return snapshots;
+}
+
+function parseOwnerInsight(content: string): OwnerBattleInsight | null {
+  const jsonMatch = content.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) return null;
+
+  try {
+    const parsed = JSON.parse(jsonMatch[0]) as Partial<OwnerBattleInsight>;
+    if (
+      !parsed.summary ||
+      !Array.isArray(parsed.voterBehavior) ||
+      !Array.isArray(parsed.whatToDo) ||
+      !Array.isArray(parsed.risks) ||
+      !parsed.strongestSignal
+    ) {
+      return null;
+    }
+
+    return {
+      summary: parsed.summary,
+      voterBehavior: parsed.voterBehavior.filter(Boolean).slice(0, 3),
+      whatToDo: parsed.whatToDo.filter(Boolean).slice(0, 3),
+      risks: parsed.risks.filter(Boolean).slice(0, 3),
+      strongestSignal: parsed.strongestSignal,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function getOwnerBattleInsight(ownerId: string): Promise<OwnerBattleInsight> {
+  const battles = await getOwnerBattleSnapshots(ownerId);
+
+  if (battles.length === 0 || !process.env.OPENROUTER_API_KEY) {
+    return buildFallbackOwnerInsight(battles);
+  }
+
+  const systemPrompt = `You are a friendly business coach for a local restaurant owner. Explain the owner's battle results in very simple English. Be direct, practical and encouraging. Return ONLY valid JSON in this shape:
+{
+  "summary": "one short paragraph",
+  "voterBehavior": ["short point 1", "short point 2", "short point 3"],
+  "whatToDo": ["action 1", "action 2", "action 3"],
+  "risks": ["risk 1", "risk 2", "risk 3"],
+  "strongestSignal": "one short sentence"
+}
+Avoid jargon. Focus on what the owner should do next.`;
+
+  const userPrompt = `Here are all the owner's battles and their response patterns:
+${JSON.stringify(battles, null, 2)}
+
+Please summarise what this means for the owner in plain language.`;
+
+  try {
+    const result = await chatWithOpenRouter(
+      [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      { temperature: 0.35 },
+    );
+
+    return parseOwnerInsight(result.content) ?? buildFallbackOwnerInsight(battles);
+  } catch {
+    return buildFallbackOwnerInsight(battles);
+  }
 }
 
 type RespondInput = {
@@ -566,6 +729,8 @@ export async function ensurePublicDemoBattle() {
     foodCostPct: 30,
     staffingCost: 45,
     wastageAllowance: 8,
+    allowReservation: true,
+    allowPreorder: true,
     unlockThreshold: 16,
     unlockBonus: "free cardamom cream",
     options: [
@@ -622,6 +787,8 @@ export async function seedDemoBattle(ownerId: string) {
     foodCostPct: 30,
     staffingCost: 45,
     wastageAllowance: 8,
+    allowReservation: true,
+    allowPreorder: true,
     unlockThreshold: 16,
     unlockBonus: "free cardamom cream",
     options: [

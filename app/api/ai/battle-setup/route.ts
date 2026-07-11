@@ -12,6 +12,7 @@ export async function POST(request: Request) {
     }
 
     const body = (await request.json()) as {
+      idea?: string;
       maxPortions?: number;
       availableHours?: string;
       foodCostPct?: number;
@@ -22,6 +23,7 @@ export async function POST(request: Request) {
     };
 
     const result = await generateBattleSetup({
+      idea: body.idea ?? "",
       maxPortions: body.maxPortions ?? 20,
       availableHours: body.availableHours ?? "3 PM - 5 PM",
       foodCostPct: body.foodCostPct ?? 30,

@@ -1,4 +1,3 @@
-import { getWaitlistCount } from "@/lib/battles";
 import EarlyAccessForm from "@/components/battle/early-access-form";
 
 const highlights = [
@@ -36,8 +35,6 @@ const bullets = [
 ];
 
 export default async function Home() {
-  const waitlistCount = await getWaitlistCount().catch(() => 0);
-
   return (
     <main className="landing-page min-h-screen px-4 py-7 text-foreground sm:px-6">
       <div className="mx-auto max-w-7xl">
@@ -114,7 +111,7 @@ export default async function Home() {
                 </p>
               </div>
               <div className="rounded-2xl border border-border/70 bg-card p-4 shadow-sm">
-                <p className="font-semibold"> Join the waitlist</p>
+                <p className="font-semibold">Join the waitlist</p>
                 <p className="mt-1 text-sm leading-6 text-muted-foreground">
                   Join the early access list and we&apos;ll keep you posted.
                 </p>

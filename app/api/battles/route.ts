@@ -53,6 +53,8 @@ export async function POST(request: Request) {
         imageUrl?: string;
         risk?: string;
       }>;
+      allowReservation?: boolean;
+      allowPreorder?: boolean;
       unlockThreshold?: number;
       unlockBonus?: string;
     };
@@ -89,6 +91,8 @@ export async function POST(request: Request) {
         ...o,
         risk: o.risk as "low" | "medium" | "high" | undefined,
       })),
+      allowReservation: body.allowReservation,
+      allowPreorder: body.allowPreorder,
       unlockThreshold: body.unlockThreshold,
       unlockBonus: body.unlockBonus,
       status: "live",

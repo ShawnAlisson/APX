@@ -42,6 +42,8 @@ export type BattleRecord = {
   staffingCost: number;
   wastageAllowance: number;
   options: BattleOption[];
+  allowReservation?: boolean;
+  allowPreorder?: boolean;
   winnerOptionId?: string;
   unlockThreshold?: number;
   unlockBonus?: string;
@@ -96,6 +98,8 @@ export type PublicBattle = {
   staffingCost: number;
   wastageAllowance: number;
   options: BattleOption[];
+  allowReservation?: boolean;
+  allowPreorder?: boolean;
   winnerOptionId?: string;
   unlockThreshold?: number;
   unlockBonus?: string;
@@ -131,4 +135,12 @@ export type BattleDashboard = {
   verdict: Verdict;
   verdictRationale: string;
   totalResponses: number;
+};
+
+export type OwnerBattleInsight = {
+  summary: string;
+  voterBehavior: string[];
+  whatToDo: string[];
+  risks: string[];
+  strongestSignal: string;
 };
