@@ -1,14 +1,15 @@
 import { chatWithOpenRouter } from "@/lib/openrouter";
 import type { BattleOption } from "@/lib/battle-types";
+import { normalizeBattleOptions } from "@/lib/food-option-catalog";
 
 export type BattleSetupInput = {
-  ingredients: string;
   maxPortions: number;
   availableHours: string;
-  targetMarginPct: number;
+  foodCostPct: number;
   minBookings: number;
   additionalCosts: number;
-  staffingCost: number;
+  staffingCostPerHour: number;
+  serviceHours: number;
 };
 
 export type BattleSetupResult = {
@@ -18,30 +19,48 @@ export type BattleSetupResult = {
 };
 
 const FALLBACK_RESULT: BattleSetupResult = {
-  question: "Should we open afternoons with sweet treats or savoury plates?",
+  question: "Which specials should headline this week's menu push?",
   options: [
     {
-      id: "sweet",
-      name: "Team Sweet",
-      description: "Coffee + cake slice",
-      price: 6,
-      teamColor: "#e8b4b8",
+      id: "option-0",
+      name: "Berry Pancake Stack",
+      description: "Warm buttermilk pancakes with mascarpone cream and roasted strawberries",
+      price: 10,
+      teamColor: "#E77C8E",
       risk: "low",
     },
     {
-      id: "savoury",
-      name: "Team Savoury",
-      description: "Half sandwich, soup & drink",
-      price: 8,
-      teamColor: "#9caf88",
+      id: "option-1",
+      name: "Lotus Cheesecake Shake",
+      description: "Loaded biscoff cheesecake milkshake with whipped vanilla cream",
+      price: 8.5,
+      teamColor: "#D39A52",
+      risk: "medium",
+    },
+    {
+      id: "option-2",
+      name: "Parmesan Chicken Pasta Bake",
+      description: "Creamy chicken rigatoni baked with mozzarella and garlic crumb",
+      price: 12.5,
+      teamColor: "#C85E41",
+      risk: "medium",
+    },
+    {
+      id: "option-3",
+      name: "Smash Burger & Loaded Fries",
+      description: "Double smashed beef burger with burger sauce and skin-on fries",
+      price: 13.5,
+      teamColor: "#7A5A43",
       risk: "medium",
     },
   ],
   warnings: [
-    "Savoury margin may be below your target — verify ingredient costs.",
-    "Afternoon staffing assumed at 1 cook after 2 PM.",
+    "Check that your staffing plan covers the peak rush if more than one special sells strongly.",
+    "Confirm your food-cost target still holds once toppings, packaging, and waste are included.",
   ],
 };
+
+const OPTION_COLORS = ["#E77C8E", "#D39A52", "#C85E41", "#7A5A43"];
 
 function parseJsonFromContent(content: string): BattleSetupResult | null {
   const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -55,6 +74,7 @@ function parseJsonFromContent(content: string): BattleSetupResult | null {
         description: string;
         price: number;
         teamColor?: string;
+        imageUrl?: string;
         risk?: string;
       }>;
       warnings?: string[];
@@ -64,14 +84,15 @@ function parseJsonFromContent(content: string): BattleSetupResult | null {
 
     return {
       question: parsed.question,
-      options: parsed.options.slice(0, 2).map((opt, i) => ({
+      options: normalizeBattleOptions(parsed.options.slice(0, 4).map((opt, i) => ({
         id: `option-${i}`,
         name: opt.name,
         description: opt.description,
         price: opt.price,
-        teamColor: opt.teamColor ?? (i === 0 ? "#e8b4b8" : "#9caf88"),
+        teamColor: opt.teamColor ?? OPTION_COLORS[i % OPTION_COLORS.length],
+        imageUrl: opt.imageUrl,
         risk: (opt.risk as BattleOption["risk"]) ?? "medium",
-      })),
+      }))),
       warnings: parsed.warnings ?? [],
     };
   } catch {
@@ -81,29 +102,29 @@ function parseJsonFromContent(content: string): BattleSetupResult | null {
 
 export async function generateBattleSetup(input: BattleSetupInput): Promise<BattleSetupResult> {
   if (!process.env.OPENROUTER_API_KEY) {
-    return FALLBACK_RESULT;
+    return { ...FALLBACK_RESULT, options: normalizeBattleOptions(FALLBACK_RESULT.options) };
   }
 
-  const systemPrompt = `You are a restaurant demand-validation assistant. Generate exactly two competing menu battle options based on owner constraints. Return ONLY valid JSON with this shape:
+  const systemPrompt = `You are a restaurant demand-validation assistant. Generate exactly 4 food-forward menu special options based on owner constraints. The options should feel like appetising cafe or dessert specials, with a mix of savoury plates and sweets when suitable. Return ONLY valid JSON with this shape:
 {
   "question": "clear business question the battle answers",
   "options": [
-    { "name": "Team Name", "description": "offer details", "price": 6.5, "teamColor": "#hex", "risk": "low|medium|high" }
+    { "name": "Special Name", "description": "offer details", "price": 6.5, "teamColor": "#hex", "risk": "low|medium|high" }
   ],
   "warnings": ["feasibility warning 1", "warning 2"]
 }
-Both options must be operationally feasible with listed ingredients. Prices in GBP.`;
+All options must be operationally feasible, feel like real menu specials, and use prices in GBP.`;
 
   const userPrompt = `Constraints:
-- Ingredients: ${input.ingredients}
 - Max portions: ${input.maxPortions}
 - Available hours: ${input.availableHours}
-- Target margin: ${input.targetMarginPct}%
+- Food cost target: ${input.foodCostPct}%
 - Min bookings to run: ${input.minBookings}
 - Additional costs: £${input.additionalCosts}
-- Staffing cost: £${input.staffingCost}
+- Staffing cost per hour: £${input.staffingCostPerHour}
+- Service hours: ${input.serviceHours}
 
-Create two realistic afternoon café battle options.`;
+Create 4 realistic specials for one campaign. Make at least 2 sweet options if the concept allows it.`;
 
   try {
     const result = await chatWithOpenRouter(
@@ -114,8 +135,8 @@ Create two realistic afternoon café battle options.`;
       { temperature: 0.5 },
     );
 
-    return parseJsonFromContent(result.content) ?? FALLBACK_RESULT;
+    return parseJsonFromContent(result.content) ?? { ...FALLBACK_RESULT, options: normalizeBattleOptions(FALLBACK_RESULT.options) };
   } catch {
-    return FALLBACK_RESULT;
+    return { ...FALLBACK_RESULT, options: normalizeBattleOptions(FALLBACK_RESULT.options) };
   }
 }

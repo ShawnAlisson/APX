@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { computeAllMetrics, getWinningOptionId } from "@/lib/battle-score";
+import { normalizeBattleOptions } from "@/lib/food-option-catalog";
 import type {
   BattleDashboard,
   BattleMetrics,
@@ -69,6 +70,7 @@ function toPublicBusiness(record: BusinessRecord): PublicBusiness {
     id: record._id.toString(),
     name: record.name,
     slug: record.slug,
+    websiteUrl: record.websiteUrl,
     googleReviewUrl: record.googleReviewUrl,
   };
 }
@@ -88,7 +90,7 @@ function toPublicBattle(record: BattleRecord, business?: PublicBusiness): Public
     foodCostPct: record.foodCostPct,
     staffingCost: record.staffingCost,
     wastageAllowance: record.wastageAllowance,
-    options: record.options,
+    options: normalizeBattleOptions(record.options),
     winnerOptionId: record.winnerOptionId,
     unlockThreshold: record.unlockThreshold,
     unlockBonus: record.unlockBonus,
@@ -177,7 +179,12 @@ export function computeVerdict(
   };
 }
 
-export async function getOrCreateBusiness(ownerId: string, name: string, googleReviewUrl?: string) {
+export async function getOrCreateBusiness(
+  ownerId: string,
+  name: string,
+  websiteUrl?: string,
+  googleReviewUrl?: string,
+) {
   await ensureIndexes();
   const db = await getDb();
   const existing = await db
@@ -185,6 +192,17 @@ export async function getOrCreateBusiness(ownerId: string, name: string, googleR
     .findOne({ ownerId });
 
   if (existing) {
+    const nextWebsiteUrl = websiteUrl ?? existing.websiteUrl;
+    const nextReviewUrl = googleReviewUrl ?? existing.googleReviewUrl;
+
+    if (nextWebsiteUrl !== existing.websiteUrl || nextReviewUrl !== existing.googleReviewUrl) {
+      await db.collection<BusinessRecord>(BUSINESS_COLLECTION).updateOne(
+        { _id: existing._id },
+        { $set: { websiteUrl: nextWebsiteUrl, googleReviewUrl: nextReviewUrl } },
+      );
+      return toPublicBusiness({ ...existing, websiteUrl: nextWebsiteUrl, googleReviewUrl: nextReviewUrl });
+    }
+
     return toPublicBusiness(existing);
   }
 
@@ -201,6 +219,7 @@ export async function getOrCreateBusiness(ownerId: string, name: string, googleR
     ownerId,
     name,
     slug,
+    websiteUrl,
     googleReviewUrl,
     createdAt: new Date(),
   };
@@ -211,13 +230,20 @@ export async function getOrCreateBusiness(ownerId: string, name: string, googleR
 
 export async function updateBusiness(
   ownerId: string,
-  input: { name?: string; googleReviewUrl?: string },
+  input: { name?: string; websiteUrl?: string; googleReviewUrl?: string },
 ) {
   await ensureIndexes();
   const db = await getDb();
   const update: Partial<BusinessRecord> = {};
   if (input.name) update.name = input.name;
+  if (input.websiteUrl !== undefined) update.websiteUrl = input.websiteUrl;
   if (input.googleReviewUrl !== undefined) update.googleReviewUrl = input.googleReviewUrl;
+
+  const existing = await db.collection<BusinessRecord>(BUSINESS_COLLECTION).findOne({ ownerId });
+  if (!existing) {
+    if (!input.name) return null;
+    return getOrCreateBusiness(ownerId, input.name, input.websiteUrl, input.googleReviewUrl);
+  }
 
   await db.collection<BusinessRecord>(BUSINESS_COLLECTION).updateOne({ ownerId }, { $set: update });
   const record = await db.collection<BusinessRecord>(BUSINESS_COLLECTION).findOne({ ownerId });
@@ -282,7 +308,7 @@ export async function createBattle(input: CreateBattleInput) {
     foodCostPct: input.foodCostPct,
     staffingCost: input.staffingCost,
     wastageAllowance: input.wastageAllowance,
-    options: input.options,
+    options: normalizeBattleOptions(input.options),
     unlockThreshold: input.unlockThreshold,
     unlockBonus: input.unlockBonus,
     createdAt: new Date(),
@@ -516,58 +542,10 @@ export async function ensurePublicDemoBattle() {
   }
 
   const ownerId = "demo-system";
-  const business = await getOrCreateBusiness(ownerId, "Demo Café", "https://g.page/demo-cafe/review");
-
-  const wednesday = new Date();
-  wednesday.setDate(wednesday.getDate() + ((3 - wednesday.getDay() + 7) % 7 || 7));
-  wednesday.setHours(20, 0, 0, 0);
-
-  return createBattle({
-    ownerId,
-    businessId: business.id,
-    question: "Should we open afternoons with sweet treats or savoury plates?",
-    deadline: wednesday.toISOString(),
-    serviceDate: "Thursday",
-    serviceWindow: "3–5 PM",
-    maxCapacity: 20,
-    minBookings: 12,
-    additionalCosts: 0,
-    foodCostPct: 30,
-    staffingCost: 45,
-    wastageAllowance: 8,
-    unlockThreshold: 16,
-    unlockBonus: "free cardamom cream",
-    options: [
-      {
-        id: "sweet",
-        name: "Team Sweet",
-        description: "Coffee + cake slice",
-        price: 6,
-        teamColor: "#e8b4b8",
-        risk: "low",
-      },
-      {
-        id: "savoury",
-        name: "Team Savoury",
-        description: "Half sandwich, soup & drink",
-        price: 8,
-        teamColor: "#9caf88",
-        risk: "medium",
-      },
-    ],
-    status: "live",
-    shortCode: "xK9m2p",
-  });
-}
-
-export async function seedDemoBattle(ownerId: string) {
-  const existing = await getBattlesByOwner(ownerId);
-  const demo = existing.find((b) => b.question.includes("sweet treats or savoury"));
-  if (demo) return demo;
-
   const business = await getOrCreateBusiness(
     ownerId,
     "Demo Café",
+    "https://apx-phi.vercel.app",
     "https://g.page/demo-cafe/review",
   );
 
@@ -597,6 +575,7 @@ export async function seedDemoBattle(ownerId: string) {
         description: "Coffee + cake slice",
         price: 6,
         teamColor: "#e8b4b8",
+        imageUrl: "/food/strawberry-pancake.svg",
         risk: "low",
       },
       {
@@ -605,6 +584,63 @@ export async function seedDemoBattle(ownerId: string) {
         description: "Half sandwich, soup & drink",
         price: 8,
         teamColor: "#9caf88",
+        imageUrl: "/food/deli-sandwich.svg",
+        risk: "medium",
+      },
+    ],
+    status: "live",
+    shortCode: "xK9m2p",
+  });
+}
+
+export async function seedDemoBattle(ownerId: string) {
+  const existing = await getBattlesByOwner(ownerId);
+  const demo = existing.find((b) => b.question.includes("sweet treats or savoury"));
+  if (demo) return demo;
+
+  const business = await getOrCreateBusiness(
+    ownerId,
+    "Demo Café",
+    "https://apx-phi.vercel.app",
+    "https://g.page/demo-cafe/review",
+  );
+
+  const wednesday = new Date();
+  wednesday.setDate(wednesday.getDate() + ((3 - wednesday.getDay() + 7) % 7 || 7));
+  wednesday.setHours(20, 0, 0, 0);
+
+  return createBattle({
+    ownerId,
+    businessId: business.id,
+    question: "Should we open afternoons with sweet treats or savoury plates?",
+    deadline: wednesday.toISOString(),
+    serviceDate: "Thursday",
+    serviceWindow: "3–5 PM",
+    maxCapacity: 20,
+    minBookings: 12,
+    additionalCosts: 0,
+    foodCostPct: 30,
+    staffingCost: 45,
+    wastageAllowance: 8,
+    unlockThreshold: 16,
+    unlockBonus: "free cardamom cream",
+    options: [
+      {
+        id: "sweet",
+        name: "Team Sweet",
+        description: "Coffee + cake slice",
+        price: 6,
+        teamColor: "#e8b4b8",
+        imageUrl: "/food/strawberry-pancake.svg",
+        risk: "low",
+      },
+      {
+        id: "savoury",
+        name: "Team Savoury",
+        description: "Half sandwich, soup & drink",
+        price: 8,
+        teamColor: "#9caf88",
+        imageUrl: "/food/deli-sandwich.svg",
         risk: "medium",
       },
     ],

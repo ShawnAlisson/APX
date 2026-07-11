@@ -23,11 +23,14 @@ export default async function DashboardPage() {
               M
             </div>
             <div>
-              <p className="text-sm font-semibold text-foreground">MenuBattle</p>
-              <p className="text-xs text-muted-foreground">Signed in as {user.email}</p>
+              <p className="text-sm font-semibold text-foreground">Owner dashboard</p>
+              <p className="text-xs text-muted-foreground">{user.email}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link href="/dashboard/settings">Profile settings</Link>
+            </Button>
             <Button asChild variant="outline" size="sm">
               <Link href="/">Home</Link>
             </Button>
@@ -44,7 +47,7 @@ export default async function DashboardPage() {
           </div>
           <div className="flex gap-2">
             <SeedDemoButton />
-            <Button asChild>
+            <Button asChild className="text-white dark:text-black">
               <Link href="/dashboard/battles/new">Create battle</Link>
             </Button>
           </div>
@@ -60,7 +63,7 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent className="flex gap-2">
               <SeedDemoButton />
-              <Button asChild>
+              <Button asChild className="text-white dark:text-black">
                 <Link href="/dashboard/battles/new">Create battle</Link>
               </Button>
             </CardContent>

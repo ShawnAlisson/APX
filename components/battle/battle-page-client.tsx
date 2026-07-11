@@ -243,6 +243,14 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                 className="w-full rounded-xl border-2 border-border bg-card p-4 text-left shadow-sm transition hover:shadow-md"
                 style={{ borderColor: opt.teamColor }}
               >
+                {opt.imageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={opt.imageUrl}
+                    alt={opt.name}
+                    className="mb-3 h-44 w-full rounded-lg object-cover"
+                  />
+                )}
                 <p className="font-bold" style={{ color: opt.teamColor }}>
                   {opt.name}
                 </p>
@@ -276,6 +284,14 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
 
           <Card className="border-0 shadow-md" style={{ borderTopColor: selectedOption.teamColor, borderTopWidth: 3 }}>
             <CardHeader>
+              {selectedOption.imageUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={selectedOption.imageUrl}
+                  alt={selectedOption.name}
+                  className="mb-3 h-44 w-full rounded-lg object-cover"
+                />
+              )}
               <CardTitle className="text-lg">{selectedOption.name}</CardTitle>
               <CardDescription>{STEPS[step]} — step {step + 1} of 4</CardDescription>
             </CardHeader>

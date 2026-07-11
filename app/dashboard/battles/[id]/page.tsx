@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import CloseBattleButton from "@/components/battle/close-battle-button";
 import QrDisplay from "@/components/battle/qr-display";
 import LogoutButton from "@/components/logout-button";
+import { getAppUrl } from "@/lib/app-url";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -35,7 +36,7 @@ export default async function BattleDetailPage({ params }: PageProps) {
   if (!dashboard) notFound();
 
   const { battle, metrics, breakEven, verdict, verdictRationale, totalResponses } = dashboard;
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const baseUrl = battle.business?.websiteUrl ?? getAppUrl();
   const battleUrl = `${baseUrl}/b/${battle.shortCode}`;
 
   return (
@@ -43,8 +44,8 @@ export default async function BattleDetailPage({ params }: PageProps) {
       <div className="mx-auto grid w-full max-w-6xl gap-6">
         <header className="flex items-center justify-between rounded-lg border border-border/70 bg-card/80 px-4 py-3">
           <div>
-            <p className="text-sm font-semibold text-foreground">MenuBattle</p>
-            <p className="text-xs text-muted-foreground">{battle.business?.name}</p>
+            <p className="text-sm font-semibold text-foreground">{battle.business?.name}</p>
+            <p className="text-xs text-muted-foreground">Battle dashboard</p>
           </div>
           <div className="flex gap-2">
             <Button asChild variant="outline" size="sm">
@@ -87,6 +88,14 @@ export default async function BattleDetailPage({ params }: PageProps) {
               return (
                 <Card key={opt.id} style={{ borderLeftColor: opt.teamColor, borderLeftWidth: 4 }}>
                   <CardHeader>
+                    {opt.imageUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={opt.imageUrl}
+                        alt={opt.name}
+                        className="mb-3 h-40 w-full rounded-md object-cover"
+                      />
+                    )}
                     <CardTitle className="text-lg" style={{ color: opt.teamColor }}>
                       {opt.name}
                     </CardTitle>

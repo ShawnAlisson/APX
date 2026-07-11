@@ -6,11 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import type { BattleOption } from "@/lib/battle-types";
 
-type WizardStep = 1 | 2 | 3;
+type WizardStep = 1 | 2;
 
 type BattleSetupResult = {
   question: string;
@@ -31,18 +30,13 @@ export default function BattleWizard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [warningsAcknowledged, setWarningsAcknowledged] = useState(false);
-
-  const [businessName, setBusinessName] = useState("");
-  const [googleReviewUrl, setGoogleReviewUrl] = useState("");
-
-  const [ingredients, setIngredients] = useState(
-    "Bread, eggs, chicken, cheese, coffee, tea, cakes",
-  );
   const [maxPortions, setMaxPortions] = useState(20);
   const [availableHours, setAvailableHours] = useState("Thu 3–5 PM");
-  const [targetMarginPct, setTargetMarginPct] = useState(30);
+  const [foodCostPct, setFoodCostPct] = useState(30);
   const [minBookings, setMinBookings] = useState(12);
-  const [staffingCost, setStaffingCost] = useState(45);
+  const [staffingCostPerHour, setStaffingCostPerHour] = useState(15);
+  const [serviceHours, setServiceHours] = useState(3);
+  const [additionalCosts, setAdditionalCosts] = useState(0);
   const [wastageAllowance, setWastageAllowance] = useState(8);
 
   const [question, setQuestion] = useState("");
@@ -60,12 +54,13 @@ export default function BattleWizard() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ingredients,
           maxPortions,
           availableHours,
-          targetMarginPct,
+          foodCostPct,
           minBookings,
-          staffingCost,
+          additionalCosts,
+          staffingCostPerHour,
+          serviceHours,
         }),
       });
       const data = await res.json();
@@ -76,7 +71,7 @@ export default function BattleWizard() {
       setOptions(result.options);
       setWarnings(result.warnings);
       setWarningsAcknowledged(false);
-      setStep(3);
+      setStep(2);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Generation failed");
     } finally {
@@ -92,17 +87,15 @@ export default function BattleWizard() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          businessName,
-          googleReviewUrl: googleReviewUrl || undefined,
           question,
           deadline: new Date(deadline).toISOString(),
           serviceDate,
           serviceWindow,
           maxCapacity: maxPortions,
           minBookings,
-          additionalCosts: 0,
-          foodCostPct: targetMarginPct,
-          staffingCost,
+          additionalCosts,
+          foodCostPct,
+          staffingCost: staffingCostPerHour * serviceHours,
           wastageAllowance,
           options,
           unlockThreshold: 16,
@@ -129,7 +122,7 @@ export default function BattleWizard() {
   return (
     <div className="mx-auto w-full max-w-2xl space-y-6">
       <div className="flex gap-2">
-        {[1, 2, 3].map((s) => (
+        {[1, 2].map((s) => (
           <Badge key={s} variant={step === s ? "default" : "outline"}>
             Step {s}
           </Badge>
@@ -145,51 +138,10 @@ export default function BattleWizard() {
       {step === 1 && (
         <Card>
           <CardHeader>
-            <CardTitle>Business profile</CardTitle>
-            <CardDescription>Tell customers who is running this battle.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="businessName">Business name</Label>
-              <Input
-                id="businessName"
-                value={businessName}
-                onChange={(e) => setBusinessName(e.target.value)}
-                placeholder="e.g. Corner Café"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="googleReviewUrl">Google review URL (optional)</Label>
-              <Input
-                id="googleReviewUrl"
-                value={googleReviewUrl}
-                onChange={(e) => setGoogleReviewUrl(e.target.value)}
-                placeholder="https://g.page/..."
-              />
-            </div>
-            <Button onClick={() => setStep(2)} disabled={!businessName.trim()}>
-              Continue
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {step === 2 && (
-        <Card>
-          <CardHeader>
             <CardTitle>Constraints</CardTitle>
-            <CardDescription>AI uses these to generate feasible battle options.</CardDescription>
+            <CardDescription>Set the commercial guardrails for this battle.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="ingredients">Ingredients available</Label>
-              <Textarea
-                id="ingredients"
-                value={ingredients}
-                onChange={(e) => setIngredients(e.target.value)}
-                rows={3}
-              />
-            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="maxPortions">Max portions</Label>
@@ -210,21 +162,40 @@ export default function BattleWizard() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="targetMarginPct">Food cost %</Label>
+                <Label htmlFor="foodCostPct">Food cost %</Label>
                 <Input
-                  id="targetMarginPct"
+                  id="foodCostPct"
                   type="number"
-                  value={targetMarginPct}
-                  onChange={(e) => setTargetMarginPct(Number(e.target.value))}
+                  value={foodCostPct}
+                  onChange={(e) => setFoodCostPct(Number(e.target.value))}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="staffingCost">Staffing cost (£)</Label>
+                <Label htmlFor="staffingCostPerHour">Staffing cost per hour (£)</Label>
                 <Input
-                  id="staffingCost"
+                  id="staffingCostPerHour"
                   type="number"
-                  value={staffingCost}
-                  onChange={(e) => setStaffingCost(Number(e.target.value))}
+                  value={staffingCostPerHour}
+                  onChange={(e) => setStaffingCostPerHour(Number(e.target.value))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="serviceHours">Service hours</Label>
+                <Input
+                  id="serviceHours"
+                  type="number"
+                  step="0.5"
+                  value={serviceHours}
+                  onChange={(e) => setServiceHours(Number(e.target.value))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="additionalCosts">Other fixed costs (£)</Label>
+                <Input
+                  id="additionalCosts"
+                  type="number"
+                  value={additionalCosts}
+                  onChange={(e) => setAdditionalCosts(Number(e.target.value))}
                 />
               </div>
               <div className="space-y-2">
@@ -245,23 +216,18 @@ export default function BattleWizard() {
                 onChange={(e) => setAvailableHours(e.target.value)}
               />
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setStep(1)}>
-                Back
-              </Button>
-              <Button onClick={generateBattle} disabled={loading}>
-                {loading ? "Generating..." : "Generate battle options"}
-              </Button>
-            </div>
+            <Button onClick={generateBattle} disabled={loading}>
+              {loading ? "Generating..." : "Generate menu options"}
+            </Button>
           </CardContent>
         </Card>
       )}
 
-      {step === 3 && (
+      {step === 2 && (
         <Card>
           <CardHeader>
             <CardTitle>Battle options</CardTitle>
-            <CardDescription>Review AI suggestions, edit, then publish.</CardDescription>
+            <CardDescription>Review the suggested specials, edit them, then publish.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -304,8 +270,16 @@ export default function BattleWizard() {
               <div
                 key={opt.id}
                 className="rounded-lg border p-4 space-y-3"
-                style={{ borderLeftColor: opt.teamColor, borderLeftWidth: 4 }}
+              style={{ borderLeftColor: opt.teamColor, borderLeftWidth: 4 }}
               >
+                {opt.imageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={opt.imageUrl}
+                    alt={opt.name}
+                    className="h-36 w-full rounded-md object-cover"
+                  />
+                )}
                 <div className="space-y-2">
                   <Label>Team name</Label>
                   <Input
@@ -364,7 +338,7 @@ export default function BattleWizard() {
             )}
 
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setStep(2)}>
+              <Button variant="outline" onClick={() => setStep(1)}>
                 Back
               </Button>
               <Button
@@ -372,7 +346,7 @@ export default function BattleWizard() {
                 disabled={
                   loading ||
                   !question ||
-                  options.length < 2 ||
+                  options.length < 3 ||
                   (warnings.length > 0 && !warningsAcknowledged)
                 }
               >

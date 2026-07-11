@@ -12,23 +12,23 @@ export async function POST(request: Request) {
     }
 
     const body = (await request.json()) as {
-      ingredients?: string;
       maxPortions?: number;
       availableHours?: string;
-      targetMarginPct?: number;
+      foodCostPct?: number;
       minBookings?: number;
       additionalCosts?: number;
-      staffingCost?: number;
+      staffingCostPerHour?: number;
+      serviceHours?: number;
     };
 
     const result = await generateBattleSetup({
-      ingredients: body.ingredients ?? "bread, eggs, chicken, cheese, coffee, tea, cakes",
       maxPortions: body.maxPortions ?? 20,
       availableHours: body.availableHours ?? "3 PM - 5 PM",
-      targetMarginPct: body.targetMarginPct ?? 30,
+      foodCostPct: body.foodCostPct ?? 30,
       minBookings: body.minBookings ?? 12,
       additionalCosts: body.additionalCosts ?? 0,
-      staffingCost: body.staffingCost ?? 45,
+      staffingCostPerHour: body.staffingCostPerHour ?? 15,
+      serviceHours: body.serviceHours ?? 3,
     });
 
     return NextResponse.json(result);

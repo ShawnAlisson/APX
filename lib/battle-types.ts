@@ -10,6 +10,7 @@ export type BattleOption = {
   description: string;
   price: number;
   teamColor: string;
+  imageUrl?: string;
   risk?: "low" | "medium" | "high";
 };
 
@@ -18,6 +19,7 @@ export type BusinessRecord = {
   ownerId: string;
   name: string;
   slug: string;
+  websiteUrl?: string;
   googleReviewUrl?: string;
   createdAt: Date;
 };
@@ -75,6 +77,7 @@ export type PublicBusiness = {
   id: string;
   name: string;
   slug: string;
+  websiteUrl?: string;
   googleReviewUrl?: string;
 };
 

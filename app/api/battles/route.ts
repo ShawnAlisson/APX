@@ -3,7 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import {
   createBattle,
   getBattlesByOwner,
-  getOrCreateBusiness,
+  getBusinessByOwnerId,
 } from "@/lib/battles";
 
 export const runtime = "nodejs";
@@ -34,8 +34,6 @@ export async function POST(request: Request) {
     }
 
     const body = (await request.json()) as {
-      businessName?: string;
-      googleReviewUrl?: string;
       question: string;
       deadline: string;
       serviceDate: string;
@@ -52,21 +50,27 @@ export async function POST(request: Request) {
         description: string;
         price: number;
         teamColor: string;
+        imageUrl?: string;
         risk?: string;
       }>;
       unlockThreshold?: number;
       unlockBonus?: string;
     };
 
-    if (!body.question || !body.options || body.options.length < 2) {
-      return NextResponse.json({ error: "Battle requires a question and two options." }, { status: 400 });
+    if (!body.question || !body.options || body.options.length < 3) {
+      return NextResponse.json(
+        { error: "Battle requires a question and at least three options." },
+        { status: 400 },
+      );
     }
 
-    const business = await getOrCreateBusiness(
-      user.id,
-      body.businessName ?? "My Business",
-      body.googleReviewUrl,
-    );
+    const business = await getBusinessByOwnerId(user.id);
+    if (!business) {
+      return NextResponse.json(
+        { error: "Please save your business name and URL in profile settings first." },
+        { status: 400 },
+      );
+    }
 
     const battle = await createBattle({
       ownerId: user.id,
