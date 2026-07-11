@@ -4,7 +4,8 @@ import EarlyAccessForm from "@/components/battle/early-access-form";
 const highlights = [
   {
     title: "Find out what customers are ready to buy",
-    description: "Build offers around clear demand signals instead of assumptions.",
+    description:
+      "Build offers around clear demand signals instead of assumptions.",
   },
   {
     title: "Identify the best days, times and offers",
@@ -19,15 +20,18 @@ const highlights = [
 const bullets = [
   {
     title: "Find out what customers are ready to buy",
-    description: "Go straight to the offers that already have demand behind them.",
+    description:
+      "Go straight to the offers that already have demand behind them.",
   },
   {
     title: "Identify the best days, times and offers",
-    description: "Use interest signals to decide when to launch, schedule or promote.",
+    description:
+      "Use interest signals to decide when to launch, schedule or promote.",
   },
   {
     title: "Turn feedback into better business decisions",
-    description: "Spend less on guesswork and more on the ideas that can pay back.",
+    description:
+      "Spend less on guesswork and more on the ideas that can pay back.",
   },
 ];
 
@@ -39,19 +43,26 @@ export default async function Home() {
       <div className="mx-auto max-w-7xl">
         <section className="mx-auto max-w-4xl text-center">
           <h1 className="mx-auto max-w-3xl text-balance text-5xl font-bold tracking-tight leading-[0.94] sm:text-[5.2rem]">
-            Stop guessing. Your customers already know how your business could grow.
+            Stop guessing. Your customers already know how your business could
+            grow.
           </h1>
           <p className="mx-auto mt-4 max-w-4xl text-pretty text-lg leading-8 text-muted-foreground sm:text-xl">
-            Test new menus, events, services and opening hours before you commit time and money.
-            Ask your customers what they want, measure genuine demand and discover which ideas are
-            most likely to bring in more revenue.
+            Test new menus, events, services and opening hours before you commit
+            time and money. Ask your customers what they want, measure genuine
+            demand and discover which ideas are most likely to bring in more
+            revenue.
           </p>
 
           <section className="mt-8 grid gap-4 md:grid-cols-3">
             {highlights.map((item) => (
-              <article key={item.title} className="rounded-[20px] border border-border/70 bg-card p-5 text-left shadow-sm">
+              <article
+                key={item.title}
+                className="rounded-[20px] border border-border/70 bg-card p-5 text-left shadow-sm"
+              >
                 <h2 className="text-lg font-semibold">{item.title}</h2>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.description}</p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  {item.description}
+                </p>
               </article>
             ))}
           </section>
@@ -60,12 +71,13 @@ export default async function Home() {
         <section className="mt-6 grid gap-5 lg:grid-cols-[1fr_0.9fr]">
           <article className="rounded-[26px] border border-border/70 bg-card p-6 shadow-sm">
             <h2 className="text-left text-xl font-semibold leading-8 sm:text-[1.35rem]">
-              Be among the first local businesses to use customer insight to test ideas and uncover
-              new opportunities for growth.
+              Be among the first local businesses to use customer insight to
+              test ideas and uncover new opportunities for growth.
             </h2>
             <p className="mt-3 text-left text-sm leading-7 text-muted-foreground sm:text-base">
-              This version keeps the message focused and removes the extra badges, so the page feels
-              cleaner while still driving the same conversion action.
+              This version keeps the message focused and removes the extra
+              badges, so the page feels cleaner while still driving the same
+              conversion action.
             </p>
 
             <div className="mt-6 grid gap-3">
@@ -77,7 +89,9 @@ export default async function Home() {
                   <span className="mt-1 size-3 shrink-0 rounded-full bg-accent" />
                   <div>
                     <p className="font-semibold">{item.title}</p>
-                    <p className="mt-1 text-sm leading-6 text-muted-foreground">{item.description}</p>
+                    <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                      {item.description}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -100,7 +114,7 @@ export default async function Home() {
                 </p>
               </div>
               <div className="rounded-2xl border border-border/70 bg-card p-4 shadow-sm">
-                <p className="font-semibold">{waitlistCount} businesses on the waitlist</p>
+                <p className="font-semibold"> Join the waitlist</p>
                 <p className="mt-1 text-sm leading-6 text-muted-foreground">
                   Join the early access list and we&apos;ll keep you posted.
                 </p>
