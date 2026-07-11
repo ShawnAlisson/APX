@@ -59,13 +59,13 @@ export default async function BattleResultPage({ params }: PageProps) {
               </>
             )}
             <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
-              <p className="text-sm uppercase tracking-[0.3em] text-white/55">
+              <p className="demo-on-image-soft text-sm uppercase tracking-[0.3em]">
                 {battle.business?.name}
               </p>
-              <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-6xl">
+              <h1 className="demo-on-image mt-3 text-4xl font-semibold tracking-tight sm:text-6xl">
                 {winner?.name ?? "Winner"} wins.
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-white/72 sm:text-base">
+              <p className="demo-on-image-muted mt-4 max-w-2xl text-sm leading-7 sm:text-base">
                 The crowd picked {winner?.description?.toLowerCase() ?? "the winning dish"}.
                 Show this page on {battle.serviceDate} during {battle.serviceWindow}.
               </p>

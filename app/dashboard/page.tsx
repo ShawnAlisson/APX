@@ -138,9 +138,14 @@ export default async function DashboardPage() {
                     >
                       {battle.status}
                     </Badge>
-                    <span className="text-xs text-muted-foreground">
-                      /b/{battle.shortCode}
-                    </span>
+                    <Link
+                      href={`/b/${battle.shortCode}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-muted-foreground transition hover:text-foreground"
+                    >
+                      Open page
+                    </Link>
                   </div>
                   <CardTitle className="text-lg leading-snug">
                     {battle.question}

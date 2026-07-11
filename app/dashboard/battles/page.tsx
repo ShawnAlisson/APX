@@ -114,9 +114,14 @@ export default async function BattlesPage() {
                     >
                       {entry.battle.status}
                     </Badge>
-                    <span className="text-xs text-muted-foreground">
-                      /b/{entry.battle.shortCode}
-                    </span>
+                    <Link
+                      href={`/b/${entry.battle.shortCode}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-muted-foreground transition hover:text-foreground"
+                    >
+                      Open page
+                    </Link>
                   </div>
                   <CardTitle className="text-lg leading-snug">
                     {entry.battle.question}

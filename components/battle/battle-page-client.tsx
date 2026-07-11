@@ -4,7 +4,13 @@ import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ScoreBar from "@/components/battle/score-bar";
@@ -111,7 +117,10 @@ function getBattleFlowSteps(battle: PublicBattle) {
   return steps;
 }
 
-function getNextFlowStep(current: BattleFlowStep, battle: PublicBattle): BattleFlowStep {
+function getNextFlowStep(
+  current: BattleFlowStep,
+  battle: PublicBattle,
+): BattleFlowStep {
   const steps = getBattleFlowSteps(battle);
   const index = steps.indexOf(current as Exclude<BattleFlowStep, "done">);
   return index >= 0 && index < steps.length - 1 ? steps[index + 1] : "done";
@@ -125,11 +134,15 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
   const searchParams = useSearchParams();
   const [stats, setStats] = useState<BattleStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedOption, setSelectedOption] = useState<BattleOption | null>(null);
+  const [selectedOption, setSelectedOption] = useState<BattleOption | null>(
+    null,
+  );
   const [step, setStep] = useState<BattleFlowStep>("vote");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [contactMethod, setContactMethod] = useState<"email" | "phone">("email");
+  const [contactMethod, setContactMethod] = useState<"email" | "phone">(
+    "email",
+  );
   const [preferredTime, setPreferredTime] = useState(TIME_SLOTS[0]);
   const [consent, setConsent] = useState(false);
   const [sessionToken] = useState(() => getSessionToken());
@@ -160,8 +173,13 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
     if (!raw) return null;
 
     try {
-      const parsed = JSON.parse(raw) as { optionId?: string; step?: BattleFlowStep };
-      const option = stats.battle.options.find((item) => item.id === parsed.optionId);
+      const parsed = JSON.parse(raw) as {
+        optionId?: string;
+        step?: BattleFlowStep;
+      };
+      const option = stats.battle.options.find(
+        (item) => item.id === parsed.optionId,
+      );
       if (!option) return null;
       return { option, step: parsed.step ?? "vote" };
     } catch {
@@ -229,7 +247,9 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
       if (!res.ok) throw new Error(data.error ?? "Failed to submit");
 
       const nextStep =
-        commitmentLevel === "deposited" ? "done" : getNextFlowStep(step, stats.battle);
+        commitmentLevel === "deposited"
+          ? "done"
+          : getNextFlowStep(step, stats.battle);
       saveBattleProgress(selectedOption.id, nextStep);
       setStep(nextStep);
       fetchStats();
@@ -283,15 +303,21 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
   }
 
   const flowSteps = stats ? getBattleFlowSteps(stats.battle) : [];
-  const stepIndex = step === "done" ? flowSteps.length : flowSteps.indexOf(step);
-  const activeStepIndex = step === "done" ? flowSteps.length : Math.max(stepIndex, 0);
+  const stepIndex =
+    step === "done" ? flowSteps.length : flowSteps.indexOf(step);
+  const activeStepIndex =
+    step === "done" ? flowSteps.length : Math.max(stepIndex, 0);
 
   if (loading) {
     return (
       <div className="demo-page flex min-h-screen items-center justify-center px-6 text-white">
         <div className="demo-panel demo-fade-up rounded-[28px] px-8 py-7 text-center">
-          <p className="text-sm uppercase tracking-[0.28em] text-white/60">Preparing the menu</p>
-          <p className="mt-3 text-lg text-white/90">Loading the live food battle...</p>
+          <p className="text-sm uppercase tracking-[0.28em] text-white/60">
+            Preparing the menu
+          </p>
+          <p className="mt-3 text-lg text-white/90">
+            Loading the live food battle...
+          </p>
         </div>
       </div>
     );
@@ -301,8 +327,12 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
     return (
       <div className="demo-page flex min-h-screen items-center justify-center px-6 text-white">
         <div className="demo-panel rounded-[28px] px-8 py-7 text-center">
-          <p className="text-sm uppercase tracking-[0.28em] text-white/60">Unavailable</p>
-          <p className="mt-3 text-lg text-white/90">This food battle could not be found.</p>
+          <p className="text-sm uppercase tracking-[0.28em] text-white/60">
+            Unavailable
+          </p>
+          <p className="mt-3 text-lg text-white/90">
+            This food battle could not be found.
+          </p>
         </div>
       </div>
     );
@@ -323,8 +353,8 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
             This service has wrapped.
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-white/70 sm:text-base">
-            The tasting window is over, but the outcome is ready. Open the result page to see
-            which dish won the crowd.
+            The tasting window is over, but the outcome is ready. Open the
+            result page to see which dish won the crowd.
           </p>
           <Button
             asChild
@@ -337,8 +367,12 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
     );
   }
 
-  const unlockOption = unlock ? battle.options.find((option) => option.id === unlock.optionId) : null;
-  const selectedMetric = selectedOption ? getMetric(metrics, selectedOption.id) : null;
+  const unlockOption = unlock
+    ? battle.options.find((option) => option.id === unlock.optionId)
+    : null;
+  const selectedMetric = selectedOption
+    ? getMetric(metrics, selectedOption.id)
+    : null;
 
   return (
     <div className="demo-page relative flex min-h-screen flex-col overflow-hidden text-white">
@@ -361,7 +395,7 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
             </div>
             <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
               <div className="space-y-5">
-                <Badge className="rounded-full border border-white/10 bg-white/6 px-4 py-1.5 text-[11px] font-medium tracking-[0.18em] text-white/70 shadow-none">
+                <Badge className="demo-on-image rounded-full border border-white/10 bg-white/6 px-4 py-1.5 text-[11px] font-medium tracking-[0.18em] shadow-none">
                   {battle.serviceDate} · {battle.serviceWindow}
                 </Badge>
                 <div>
@@ -374,18 +408,28 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                 </div>
                 <div className="grid gap-3 sm:grid-cols-3">
                   <div className="demo-panel-soft rounded-[24px] p-4">
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">Closes in</p>
+                    <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">
+                      Closes in
+                    </p>
                     <p className="mt-2 text-lg font-semibold text-white">
                       <Countdown deadline={battle.deadline} />
                     </p>
                   </div>
                   <div className="demo-panel-soft rounded-[24px] p-4">
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">Minimum run</p>
-                    <p className="mt-2 text-lg font-semibold text-white">{battle.minBookings} bookings</p>
+                    <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">
+                      Minimum run
+                    </p>
+                    <p className="mt-2 text-lg font-semibold text-white">
+                      {battle.minBookings} bookings
+                    </p>
                   </div>
                   <div className="demo-panel-soft rounded-[24px] p-4">
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">Current lead</p>
-                    <p className="mt-2 text-lg font-semibold text-white">{heroOption.name}</p>
+                    <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">
+                      Current lead
+                    </p>
+                    <p className="mt-2 text-lg font-semibold text-white">
+                      {heroOption.name}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -404,16 +448,22 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                     </>
                   )}
                   <div className="absolute inset-x-0 bottom-0 p-5">
-                    <p className="text-[11px] uppercase tracking-[0.26em] text-white/65">
+                    <p className="demo-on-image-soft text-[11px] uppercase tracking-[0.26em]">
                       Spotlight dish
                     </p>
-                    <p className="mt-2 text-2xl font-semibold">{heroOption.name}</p>
-                    <p className="mt-1 text-sm text-white/75">{heroOption.description}</p>
+                    <p className="demo-on-image mt-2 text-2xl font-semibold">
+                      {heroOption.name}
+                    </p>
+                    <p className="demo-on-image-muted mt-1 text-sm">
+                      {heroOption.description}
+                    </p>
                     <div className="mt-4 flex items-center justify-between text-sm">
-                      <span className="rounded-full bg-black/35 px-3 py-1 text-white/80">
+                      <span className="demo-on-image rounded-full bg-black/35 px-3 py-1">
                         {heroMetric?.votes ?? 0} supporters
                       </span>
-                      <span className="text-lg font-semibold">£{heroOption.price.toFixed(2)}</span>
+                      <span className="text-lg font-semibold">
+                        £{heroOption.price.toFixed(2)}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -425,14 +475,18 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
             className="demo-panel demo-fade-up rounded-[32px] p-5 sm:p-6"
             style={{ animationDelay: "130ms" }}
           >
-            <p className="text-[11px] uppercase tracking-[0.28em] text-white/50">How it works</p>
+            <p className="text-[11px] uppercase tracking-[0.28em] text-white/50">
+              How it works
+            </p>
             <div className="mt-4 space-y-3">
               {EXPERIENCE_POINTS.map((point, index) => (
                 <div key={point} className="demo-panel-soft rounded-[22px] p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/45">
                     0{index + 1}
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-white/78">{point}</p>
+                  <p className="mt-2 text-sm leading-6 text-white/78">
+                    {point}
+                  </p>
                 </div>
               ))}
             </div>
@@ -445,7 +499,9 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
           <section className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
             {battle.options.map((opt, index) => {
               const metric = getMetric(metrics, opt.id);
-              const isLeader = (metric?.battleScore ?? 0) === Math.max(...metrics.map((entry) => entry.battleScore));
+              const isLeader =
+                (metric?.battleScore ?? 0) ===
+                Math.max(...metrics.map((entry) => entry.battleScore));
 
               return (
                 <button
@@ -482,25 +538,32 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                       </>
                     )}
                     <div className="absolute left-4 right-4 top-4 flex items-start justify-between gap-3">
-                      <span className="rounded-full bg-black/35 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.22em] text-white/80">
+                      <span className="demo-on-image rounded-full bg-black/35 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.22em]">
                         {isLeader ? "Leading" : "Open"}
                       </span>
                       <span
                         className="rounded-full px-3 py-1 text-xs font-semibold"
                         style={{
                           backgroundColor: `${opt.teamColor}26`,
-                          color: getReadableTextColor(opt.teamColor) === "#ffffff" ? "#fff" : "#111827",
+                          color:
+                            getReadableTextColor(opt.teamColor) === "#ffffff"
+                              ? "#fff"
+                              : "#111827",
                         }}
                       >
                         £{opt.price.toFixed(2)}
                       </span>
                     </div>
                     <div className="absolute inset-x-0 bottom-0 p-5">
-                      <p className="text-[11px] uppercase tracking-[0.26em] text-white/62">
+                      <p className="demo-on-image-soft text-[11px] uppercase tracking-[0.26em]">
                         Chef&apos;s contender
                       </p>
-                      <p className="mt-2 text-2xl font-semibold">{opt.name}</p>
-                      <p className="mt-1 text-sm leading-6 text-white/72">{opt.description}</p>
+                      <p className="demo-on-image mt-2 text-2xl font-semibold">
+                        {opt.name}
+                      </p>
+                      <p className="demo-on-image-muted mt-1 text-sm leading-6">
+                        {opt.description}
+                      </p>
                     </div>
                   </div>
 
@@ -510,7 +573,9 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                         <p className="text-[11px] uppercase tracking-[0.22em] text-white/42">
                           Supporters
                         </p>
-                        <p className="mt-2 text-xl font-semibold text-white">{metric?.votes ?? 0}</p>
+                        <p className="mt-2 text-xl font-semibold text-white">
+                          {metric?.votes ?? 0}
+                        </p>
                       </div>
                       <div className="demo-panel-soft rounded-[20px] p-4">
                         <p className="text-[11px] uppercase tracking-[0.22em] text-white/42">
@@ -524,11 +589,15 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
 
                     <div className="flex items-center justify-between gap-4">
                       <p className="text-sm leading-6 text-white/65">
-                        Back this dish and help decide what the restaurant serves next.
+                        Back this dish and help decide what the restaurant
+                        serves next.
                       </p>
                       <span
                         className="whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition group-hover:scale-[1.02]"
-                        style={{ borderColor: `${opt.teamColor}55`, color: opt.teamColor }}
+                        style={{
+                          borderColor: `${opt.teamColor}55`,
+                          color: opt.teamColor,
+                        }}
                       >
                         Choose dish
                       </span>
@@ -540,11 +609,18 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
           </section>
 
           {unlock && unlockOption && unlock.remaining > 0 && (
-            <section className="demo-panel demo-fade-up rounded-[28px] p-5 text-center" style={{ animationDelay: "420ms" }}>
+            <section
+              className="demo-panel demo-fade-up rounded-[28px] p-5 text-center"
+              style={{ animationDelay: "420ms" }}
+            >
               <p className="text-sm leading-7 text-white/80">
-                <strong className="text-white">{unlockOption.name}</strong> needs{" "}
-                <strong className="text-white">{unlock.remaining}</strong> more backers to unlock{" "}
-                <span className="text-[#f7d7b8]">{battle.unlockBonus ?? "a bonus item"}</span>.
+                <strong className="text-white">{unlockOption.name}</strong>{" "}
+                needs <strong className="text-white">{unlock.remaining}</strong>{" "}
+                more backers to unlock{" "}
+                <span className="text-[#f7d7b8]">
+                  {battle.unlockBonus ?? "a bonus item"}
+                </span>
+                .
               </p>
             </section>
           )}
@@ -572,7 +648,7 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="rounded-full px-4 text-white/75 hover:bg-white/10 hover:text-white"
+                  className="demo-on-image rounded-full px-4 hover:bg-white/10"
                   onClick={() => {
                     setSelectedOption(null);
                     setStep("vote");
@@ -599,13 +675,13 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                     </>
                   )}
                   <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
-                    <p className="text-[11px] uppercase tracking-[0.28em] text-white/60">
+                    <p className="demo-on-image-soft text-[11px] uppercase tracking-[0.28em]">
                       Selected dish
                     </p>
-                    <CardTitle className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                    <CardTitle className="demo-on-image mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
                       {selectedOption.name}
                     </CardTitle>
-                    <CardDescription className="mt-2 max-w-2xl text-sm leading-7 text-white/72 sm:text-base">
+                    <CardDescription className="demo-on-image-muted mt-2 max-w-2xl text-sm leading-7 sm:text-base">
                       {selectedOption.description}
                     </CardDescription>
                   </div>
@@ -622,9 +698,16 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                 {step === "vote" && (
                   <div className="space-y-4">
                     <p className="text-sm leading-7 text-white/78 sm:text-base">
-                      Back <strong className="text-white">{selectedOption.name}</strong> for{" "}
-                      <strong className="text-white">£{selectedOption.price.toFixed(2)}</strong> and
-                      help the kitchen decide what deserves the next spotlight service.
+                      Back{" "}
+                      <strong className="text-white">
+                        {selectedOption.name}
+                      </strong>{" "}
+                      for{" "}
+                      <strong className="text-white">
+                        £{selectedOption.price.toFixed(2)}
+                      </strong>{" "}
+                      and help the kitchen decide what deserves the next
+                      spotlight service.
                     </p>
                     <Button
                       className="h-12 w-full rounded-full border border-black/10 font-semibold shadow-md shadow-black/20 transition hover:-translate-y-0.5 hover:shadow-lg"
@@ -644,7 +727,9 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                   <div className="space-y-4">
                     <div className="flex flex-wrap gap-2">
                       <Button
-                        variant={contactMethod === "email" ? "default" : "outline"}
+                        variant={
+                          contactMethod === "email" ? "default" : "outline"
+                        }
                         size="sm"
                         className="rounded-full"
                         onClick={() => setContactMethod("email")}
@@ -652,7 +737,9 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                         Email
                       </Button>
                       <Button
-                        variant={contactMethod === "phone" ? "default" : "outline"}
+                        variant={
+                          contactMethod === "phone" ? "default" : "outline"
+                        }
                         size="sm"
                         className="rounded-full"
                         onClick={() => setContactMethod("phone")}
@@ -662,41 +749,44 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                     </div>
                     {contactMethod === "email" ? (
                       <div className="space-y-2">
-                        <Label className="text-white/78">Email</Label>
+                        <Label className="demo-form-text">Email</Label>
                         <Input
                           type="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="you@example.com"
-                          className="h-12 rounded-2xl border-white/10 bg-white/6 text-white placeholder:text-white/35"
+                          className="demo-form-input h-12 rounded-2xl"
                         />
                       </div>
                     ) : (
                       <div className="space-y-2">
-                        <Label className="text-white/78">Phone</Label>
+                        <Label className="demo-form-text">Phone</Label>
                         <Input
                           type="tel"
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
                           placeholder="07..."
-                          className="h-12 rounded-2xl border-white/10 bg-white/6 text-white placeholder:text-white/35"
+                          className="demo-form-input h-12 rounded-2xl"
                         />
                       </div>
                     )}
-                    <label className="flex items-start gap-3 rounded-[20px] border border-white/8 bg-white/4 p-4 text-sm text-white/72">
+                    <label className="demo-on-image flex items-start gap-3 rounded-[20px] border border-white/8 bg-white/4 p-4 text-sm">
                       <input
                         type="checkbox"
                         checked={consent}
                         onChange={(e) => setConsent(e.target.checked)}
                         className="mt-1"
                       />
-                      Contact me with the result of this service test and any booking details.
+                      Contact me with the result of this service test and any
+                      booking details.
                     </label>
                     <Button
                       className="h-12 w-full rounded-full bg-white text-black hover:bg-white/90"
                       onClick={() => submitLevel("registered")}
                       disabled={
-                        submitting || !consent || (contactMethod === "email" ? !email : !phone)
+                        submitting ||
+                        !consent ||
+                        (contactMethod === "email" ? !email : !phone)
                       }
                     >
                       Continue
@@ -707,13 +797,16 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                 {step === "reserve" && (
                   <div className="space-y-4">
                     <p className="text-sm leading-7 text-white/72">
-                      Reserve your preferred arrival time for {battle.serviceDate}.
+                      Reserve your preferred arrival time for{" "}
+                      {battle.serviceDate}.
                     </p>
                     <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
                       {TIME_SLOTS.map((timeSlot) => (
                         <Button
                           key={timeSlot}
-                          variant={preferredTime === timeSlot ? "default" : "outline"}
+                          variant={
+                            preferredTime === timeSlot ? "default" : "outline"
+                          }
                           size="sm"
                           className="rounded-2xl"
                           onClick={() => setPreferredTime(timeSlot)}
@@ -735,8 +828,9 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                 {step === "preorder" && (
                   <div className="space-y-4">
                     <p className="text-sm leading-7 text-white/78">
-                      Pay <strong className="text-white">£1</strong> now and it comes off your order
-                      if {selectedOption.name} wins the service.
+                      Pay <strong className="text-white">£1</strong> now and it
+                      comes off your order if {selectedOption.name} wins the
+                      service.
                     </p>
                     {mollieEnabled ? (
                       <Button
@@ -748,8 +842,8 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                       </Button>
                     ) : (
                       <p className="rounded-[20px] border border-dashed border-white/15 bg-white/5 p-4 text-sm leading-6 text-white/62">
-                        Mollie checkout is not connected yet. Add a Mollie test API key to enable
-                        the real hosted checkout here.
+                        Mollie checkout is not connected yet. Add a Mollie test
+                        API key to enable the real hosted checkout here.
                       </p>
                     )}
                     <Button
@@ -764,28 +858,36 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
 
                 {step === "done" && (
                   <div className="space-y-4 text-center">
-                    <p className="text-2xl font-semibold text-white">You&apos;re on the list.</p>
+                    <p className="text-2xl font-semibold text-white">
+                      You&apos;re on the list.
+                    </p>
                     <p className="text-sm leading-7 text-white/72">
-                      Share this page with friends and help {selectedOption.name} win the next
-                      service.
+                      Share this page with friends and help{" "}
+                      {selectedOption.name} win the next service.
                     </p>
                     {battle.allowPreorder ? (
                       <p className="text-sm text-white/86">
                         Your £1 deposit becomes £1 off if this dish wins.
                       </p>
                     ) : battle.allowReservation ? (
-                      <p className="text-sm text-white/86">Your spot is saved for {preferredTime}.</p>
+                      <p className="text-sm text-white/86">
+                        Your spot is saved for {preferredTime}.
+                      </p>
                     ) : (
-                      <p className="text-sm text-white/86">We&apos;ll keep you updated directly.</p>
+                      <p className="text-sm text-white/86">
+                        We&apos;ll keep you updated directly.
+                      </p>
                     )}
 
                     {battle.business?.googleReviewUrl && (
                       <div className="rounded-[24px] border border-white/10 bg-white/5 p-4 text-sm">
-                        <p className="text-white">Leave a Google review and claim a free side dish.</p>
+                        <p className="demo-on-image">
+                          Leave a Google review and claim a free side dish.
+                        </p>
                         <Button
                           variant="outline"
                           size="sm"
-                          className="mt-3 rounded-full border-white/20 bg-transparent text-white hover:bg-white hover:text-black"
+                          className="demo-on-image mt-3 rounded-full border-white/20 bg-transparent hover:bg-white hover:text-black"
                           asChild
                         >
                           <a
@@ -800,14 +902,16 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="mt-2 block w-full rounded-full text-white/72 hover:bg-white/8 hover:text-white"
+                            className="demo-on-image mt-2 block w-full rounded-full hover:bg-white/8 hover:text-white"
                             onClick={claimReviewReward}
                           >
                             Claim code: REVIEW-SIDE
                           </Button>
                         )}
                         {reviewClaimed && (
-                          <p className="mt-2 text-xs text-emerald-300">Code REVIEW-SIDE claimed.</p>
+                          <p className="mt-2 text-xs text-emerald-300">
+                            Code REVIEW-SIDE claimed.
+                          </p>
                         )}
                       </div>
                     )}
@@ -820,16 +924,24 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
           <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
             <Card className="demo-panel rounded-[30px] border-0 text-white shadow-none">
               <CardHeader>
-                <CardTitle className="text-xl font-semibold">Service snapshot</CardTitle>
+                <CardTitle className="text-xl font-semibold">
+                  Service snapshot
+                </CardTitle>
                 <CardDescription className="text-white/62">
                   A tighter view of how this dish is performing right now.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="demo-panel-soft rounded-[22px] p-4">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-white/42">Selected dish</p>
-                  <p className="mt-2 text-2xl font-semibold text-white">{selectedOption.name}</p>
-                  <p className="mt-2 text-sm leading-6 text-white/68">{selectedOption.description}</p>
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-white/42">
+                    Selected dish
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold text-white">
+                    {selectedOption.name}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-white/68">
+                    {selectedOption.description}
+                  </p>
                   <p className="mt-4 text-3xl font-semibold text-white">
                     £{selectedOption.price.toFixed(2)}
                   </p>
@@ -837,13 +949,17 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="demo-panel-soft rounded-[22px] p-4">
-                    <p className="text-[11px] uppercase tracking-[0.22em] text-white/42">Supporters</p>
+                    <p className="text-[11px] uppercase tracking-[0.22em] text-white/42">
+                      Supporters
+                    </p>
                     <p className="mt-2 text-2xl font-semibold text-white">
                       {selectedMetric?.votes ?? 0}
                     </p>
                   </div>
                   <div className="demo-panel-soft rounded-[22px] p-4">
-                    <p className="text-[11px] uppercase tracking-[0.22em] text-white/42">Committed</p>
+                    <p className="text-[11px] uppercase tracking-[0.22em] text-white/42">
+                      Committed
+                    </p>
                     <p className="mt-2 text-2xl font-semibold text-white">
                       £{(selectedMetric?.revenueCommitted ?? 0).toFixed(0)}
                     </p>
@@ -851,10 +967,12 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                 </div>
 
                 <div className="demo-panel-soft rounded-[22px] p-4">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-white/42">What happens next</p>
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-white/42">
+                    What happens next
+                  </p>
                   <p className="mt-2 text-sm leading-7 text-white/68">
-                    Once enough guests commit, the restaurant can schedule the service with more
-                    confidence and lower waste.
+                    Once enough guests commit, the restaurant can schedule the
+                    service with more confidence and lower waste.
                   </p>
                 </div>
               </CardContent>

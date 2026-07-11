@@ -45,6 +45,69 @@ function slugify(value: string) {
     .replace(/^-|-$/g, "");
 }
 
+const DEMO_BATTLE_SHORT_CODE = "xK9m2p";
+const DEMO_BATTLE_QUESTION =
+  "Which Friday special would you book first: Tapas Friday or Seafood Friday?";
+
+function buildDemoBattleOptions(): BattleOption[] {
+  return [
+    {
+      id: "tapas",
+      name: "Tapas Friday",
+      description: "Spanish Potatoes, Chipollatas, Chorizo Paté",
+      price: 7,
+      teamColor: "#d89b5f",
+      imageUrl: "/food/pics/joseph-gonzalez-zcUgjyqEwe8-unsplash.jpg",
+      risk: "low",
+    },
+    {
+      id: "seafood",
+      name: "Seafood Friday",
+      description: "Chargrilled Squid, White Wine Marinated Salmon, Sweet & Salty Scampi",
+      price: 8,
+      teamColor: "#7ca69a",
+      imageUrl: "/food/pics/anh-nguyen-kcA-c3f_3FE-unsplash.jpg",
+      risk: "medium",
+    },
+  ];
+}
+
+async function upsertDemoBattleFields(battleId: ObjectId, ownerId: string) {
+  const db = await getDb();
+  const updated = {
+    question: DEMO_BATTLE_QUESTION,
+    serviceDate: "Friday",
+    serviceWindow: "3–5 PM",
+    maxCapacity: 20,
+    minBookings: 12,
+    additionalCosts: 0,
+    foodCostPct: 30,
+    staffingCost: 45,
+    wastageAllowance: 8,
+    options: buildDemoBattleOptions(),
+    allowReservation: true,
+    allowPreorder: true,
+    unlockThreshold: 16,
+    unlockBonus: "free herb dip",
+    status: "live" as BattleStatus,
+    shortCode: DEMO_BATTLE_SHORT_CODE,
+    ownerId,
+  };
+
+  await db.collection<BattleRecord>(BATTLE_COLLECTION).updateOne({ _id: battleId }, { $set: updated });
+
+  const battle = await db.collection<BattleRecord>(BATTLE_COLLECTION).findOne({ _id: battleId });
+  if (!battle) {
+    return null;
+  }
+
+  const business = await db
+    .collection<BusinessRecord>(BUSINESS_COLLECTION)
+    .findOne({ _id: battle.businessId });
+
+  return toPublicBattle(battle, business ? toPublicBusiness(business) : undefined);
+}
+
 async function ensureIndexes() {
   if (!indexesPromise.has("battles")) {
     indexesPromise.set(
@@ -696,8 +759,14 @@ export async function getWaitlistCount() {
 export async function ensurePublicDemoBattle() {
   await ensureIndexes();
   const db = await getDb();
-  const existing = await db.collection<BattleRecord>(BATTLE_COLLECTION).findOne({ shortCode: "xK9m2p" });
+  const existing = await db.collection<BattleRecord>(BATTLE_COLLECTION).findOne({
+    shortCode: DEMO_BATTLE_SHORT_CODE,
+  });
   if (existing) {
+    if (existing.question !== DEMO_BATTLE_QUESTION) {
+      return upsertDemoBattleFields(existing._id, existing.ownerId);
+    }
+
     const business = await db
       .collection<BusinessRecord>(BUSINESS_COLLECTION)
       .findOne({ _id: existing.businessId });
@@ -719,9 +788,9 @@ export async function ensurePublicDemoBattle() {
   return createBattle({
     ownerId,
     businessId: business.id,
-    question: "Should we open afternoons with sweet treats or savoury plates?",
+    question: DEMO_BATTLE_QUESTION,
     deadline: wednesday.toISOString(),
-    serviceDate: "Thursday",
+    serviceDate: "Friday",
     serviceWindow: "3–5 PM",
     maxCapacity: 20,
     minBookings: 12,
@@ -732,27 +801,8 @@ export async function ensurePublicDemoBattle() {
     allowReservation: true,
     allowPreorder: true,
     unlockThreshold: 16,
-    unlockBonus: "free cardamom cream",
-    options: [
-      {
-        id: "sweet",
-        name: "Team Sweet",
-        description: "Coffee + cake slice",
-        price: 6,
-        teamColor: "#e8b4b8",
-        imageUrl: "/food/pics/joseph-gonzalez-zcUgjyqEwe8-unsplash.jpg",
-        risk: "low",
-      },
-      {
-        id: "savoury",
-        name: "Team Savoury",
-        description: "Half sandwich, soup & drink",
-        price: 8,
-        teamColor: "#9caf88",
-        imageUrl: "/food/pics/anh-nguyen-kcA-c3f_3FE-unsplash.jpg",
-        risk: "medium",
-      },
-    ],
+    unlockBonus: "free herb dip",
+    options: buildDemoBattleOptions(),
     status: "live",
     shortCode: "xK9m2p",
   });
@@ -760,8 +810,14 @@ export async function ensurePublicDemoBattle() {
 
 export async function seedDemoBattle(ownerId: string) {
   const existing = await getBattlesByOwner(ownerId);
-  const demo = existing.find((b) => b.question.includes("sweet treats or savoury"));
-  if (demo) return demo;
+  const demo = existing.find((b) => b.shortCode === DEMO_BATTLE_SHORT_CODE);
+  if (demo) {
+    if (demo.question !== DEMO_BATTLE_QUESTION) {
+      const battle = await upsertDemoBattleFields(new ObjectId(demo.id), ownerId);
+      if (battle) return battle;
+    }
+    return demo;
+  }
 
   const business = await getOrCreateBusiness(
     ownerId,
@@ -777,9 +833,9 @@ export async function seedDemoBattle(ownerId: string) {
   return createBattle({
     ownerId,
     businessId: business.id,
-    question: "Should we open afternoons with sweet treats or savoury plates?",
+    question: DEMO_BATTLE_QUESTION,
     deadline: wednesday.toISOString(),
-    serviceDate: "Thursday",
+    serviceDate: "Friday",
     serviceWindow: "3–5 PM",
     maxCapacity: 20,
     minBookings: 12,
@@ -790,27 +846,8 @@ export async function seedDemoBattle(ownerId: string) {
     allowReservation: true,
     allowPreorder: true,
     unlockThreshold: 16,
-    unlockBonus: "free cardamom cream",
-    options: [
-      {
-        id: "sweet",
-        name: "Team Sweet",
-        description: "Coffee + cake slice",
-        price: 6,
-        teamColor: "#e8b4b8",
-        imageUrl: "/food/pics/joseph-gonzalez-zcUgjyqEwe8-unsplash.jpg",
-        risk: "low",
-      },
-      {
-        id: "savoury",
-        name: "Team Savoury",
-        description: "Half sandwich, soup & drink",
-        price: 8,
-        teamColor: "#9caf88",
-        imageUrl: "/food/pics/anh-nguyen-kcA-c3f_3FE-unsplash.jpg",
-        risk: "medium",
-      },
-    ],
+    unlockBonus: "free herb dip",
+    options: buildDemoBattleOptions(),
     status: "live",
   });
 }
