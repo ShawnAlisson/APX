@@ -14,10 +14,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "APX",
-    template: "%s | APX",
+    default: "MenuBattle",
+    template: "%s | MenuBattle",
   },
-  description: "Next.js 16 starter with MongoDB, session auth, and OpenRouter.",
+  description: "Test demand before you cook. Gamified menu experiments for local businesses.",
 };
 
 export default function RootLayout({

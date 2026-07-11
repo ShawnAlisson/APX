@@ -1,33 +1,32 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import ChatPanel from "@/components/chat-panel";
-import LogoutButton from "@/components/logout-button";
 import { getCurrentUser } from "@/lib/auth";
+import { getBattlesByOwner } from "@/lib/battles";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import LogoutButton from "@/components/logout-button";
+import SeedDemoButton from "@/components/battle/seed-demo-button";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
+  if (!user) redirect("/login");
 
-  if (!user) {
-    redirect("/login");
-  }
+  const battles = await getBattlesByOwner(user.id);
 
   return (
-    <main className="min-h-screen px-4 py-6 sm:px-6">
+    <main className="min-h-screen bg-[#faf6f1] px-4 py-6 sm:px-6">
       <div className="mx-auto grid w-full max-w-6xl gap-6">
-        <header className="flex items-center justify-between rounded-lg border border-border bg-card/70 px-4 py-3 backdrop-blur">
+        <header className="flex items-center justify-between rounded-lg border bg-white/80 px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="size-9 rounded-md bg-primary/10 text-primary grid place-items-center text-sm font-semibold">
-              A
+            <div className="size-9 rounded-md bg-[#3d2914] text-white grid place-items-center text-sm font-semibold">
+              M
             </div>
-            <div className="grid">
-              <p className="text-sm font-semibold leading-none">Dashboard</p>
+            <div>
+              <p className="text-sm font-semibold text-[#3d2914]">MenuBattle</p>
               <p className="text-xs text-muted-foreground">Signed in as {user.email}</p>
             </div>
           </div>
-
           <div className="flex items-center gap-2">
             <Button asChild variant="outline" size="sm">
               <Link href="/">Home</Link>
@@ -36,35 +35,72 @@ export default async function DashboardPage() {
           </div>
         </header>
 
-        <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+        <section className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-[#3d2914]">Your battles</h1>
+            <p className="text-sm text-muted-foreground">
+              Create experiments, share QR codes, track demand.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <SeedDemoButton />
+            <Button asChild className="bg-[#3d2914]">
+              <Link href="/dashboard/battles/new">Create battle</Link>
+            </Button>
+          </div>
+        </section>
+
+        {battles.length === 0 ? (
           <Card>
             <CardHeader>
-              <Badge className="w-fit">Session</Badge>
-              <CardTitle className="text-2xl">
-                Welcome back{user.name ? `, ${user.name}` : ""}.
-              </CardTitle>
+              <CardTitle>No battles yet</CardTitle>
               <CardDescription>
-                MongoDB, auth, and OpenRouter are all wired and ready.
+                Create your first battle or load the demo to see MenuBattle in action.
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-3 text-sm text-muted-foreground">
-              <p>
-                <span className="font-medium text-foreground">MongoDB:</span> users and sessions
-                are stored in dedicated collections with TTL cleanup for expired sessions.
-              </p>
-              <p>
-                <span className="font-medium text-foreground">Auth:</span> register and login
-                endpoints issue opaque, HTTP-only cookies.
-              </p>
-              <p>
-                <span className="font-medium text-foreground">OpenRouter:</span> the chat panel
-                calls the server route so your API key stays off the client.
-              </p>
+            <CardContent className="flex gap-2">
+              <SeedDemoButton />
+              <Button asChild>
+                <Link href="/dashboard/battles/new">Create battle</Link>
+              </Button>
             </CardContent>
           </Card>
-
-          <ChatPanel />
-        </section>
+        ) : (
+          <section className="grid gap-4 md:grid-cols-2">
+            {battles.map((battle) => (
+              <Card key={battle.id} className="hover:shadow-md transition-shadow">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <Badge variant={battle.status === "live" ? "default" : "outline"}>
+                      {battle.status}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">/b/{battle.shortCode}</span>
+                  </div>
+                  <CardTitle className="text-lg leading-snug">{battle.question}</CardTitle>
+                  <CardDescription>
+                    {battle.serviceDate} · {battle.serviceWindow}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex gap-2">
+                    {battle.options.map((opt) => (
+                      <span
+                        key={opt.id}
+                        className="rounded-full px-2 py-1 text-xs font-medium"
+                        style={{ backgroundColor: `${opt.teamColor}33`, color: opt.teamColor }}
+                      >
+                        {opt.name}
+                      </span>
+                    ))}
+                  </div>
+                  <Button asChild className="mt-4 w-full" variant="outline">
+                    <Link href={`/dashboard/battles/${battle.id}`}>View dashboard</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </section>
+        )}
       </div>
     </main>
   );
