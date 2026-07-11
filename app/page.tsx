@@ -1,131 +1,120 @@
-import Link from "next/link";
-import { getCurrentUser } from "@/lib/auth";
 import { getWaitlistCount } from "@/lib/battles";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import WaitlistForm from "@/components/battle/waitlist-form";
+import EarlyAccessForm from "@/components/battle/early-access-form";
 
-const features = [
+const highlights = [
   {
-    title: "Two realistic offers",
-    description:
-      "AI generates feasible menu concepts from your ingredients and constraints.",
+    title: "Find out what customers are ready to buy",
+    description: "Build offers around clear demand signals instead of assumptions.",
   },
   {
-    title: "Escalating commitment",
-    description:
-      "Vote → register → reserve → optional £1 deposit. Real demand, not opinions.",
+    title: "Identify the best days, times and offers",
+    description: "Choose launch windows and promotions with more confidence.",
   },
   {
-    title: "Break-even math",
-    description:
-      "Proceed, modify, or cancel — backed by revenue and cost projections.",
+    title: "Turn feedback into better business decisions",
+    description: "Use what people actually want to shape your next test.",
+  },
+];
+
+const bullets = [
+  {
+    title: "Find out what customers are ready to buy",
+    description: "Go straight to the offers that already have demand behind them.",
+  },
+  {
+    title: "Identify the best days, times and offers",
+    description: "Use interest signals to decide when to launch, schedule or promote.",
+  },
+  {
+    title: "Turn feedback into better business decisions",
+    description: "Spend less on guesswork and more on the ideas that can pay back.",
   },
 ];
 
 export default async function Home() {
-  const user = await getCurrentUser();
   const waitlistCount = await getWaitlistCount().catch(() => 0);
 
   return (
-    <main className="min-h-screen bg-background px-4 py-6 text-foreground sm:px-6">
-      <div className="mx-auto grid w-full max-w-6xl gap-8">
-        <header className="flex items-center justify-between rounded-lg border border-border/70 bg-card/80 px-4 py-3 backdrop-blur">
-          <div className="flex items-center gap-3">
-            <div className="grid size-9 place-items-center rounded-md bg-primary text-primary-foreground text-sm font-bold">
-              M
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">
-                MenuBattle
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Test demand before you cook
-              </p>
-            </div>
-          </div>
-          <Button asChild variant="outline" size="sm">
-            <Link href={user ? "/dashboard" : "/login"}>
-              {user ? "Dashboard" : "Owner sign in"}
-            </Link>
-          </Button>
+    <main className="min-h-screen bg-background px-4 py-7 text-foreground sm:px-6">
+      <div className="mx-auto max-w-7xl">
+        <header className="mb-6 flex items-center justify-between gap-4">
+          <div className="font-semibold tracking-tight">MenuBattle</div>
+          <span className="inline-flex items-center rounded-full border border-border/70 bg-card px-3 py-2 text-sm text-muted-foreground">
+            Proof-first minimal v2
+          </span>
         </header>
 
-        <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <Badge variant="secondary">Gamified demand validation</Badge>
-              <h1 className="max-w-2xl text-4xl font-bold leading-tight text-foreground sm:text-5xl">
-                Turn menu ideas into paid experiments
-              </h1>
-              <p className="max-w-xl text-lg leading-relaxed text-muted-foreground">
-                Local businesses test two competing offers. Customers back one
-                with escalating commitment. You see break-even math and a clear
-                proceed / modify / cancel verdict.
-              </p>
-            </div>
+        <section className="mx-auto max-w-4xl text-center">
+          <h1 className="mx-auto max-w-3xl text-balance text-4xl font-bold tracking-tight sm:text-6xl">
+            Stop guessing. Your customers already know how your business could grow.
+          </h1>
+          <p className="mx-auto mt-4 max-w-4xl text-pretty text-lg leading-8 text-muted-foreground sm:text-xl">
+            Test new menus, events, services and opening hours before you commit time and money.
+            Ask your customers what they want, measure genuine demand and discover which ideas are
+            most likely to bring in more revenue.
+          </p>
 
-            <div className="flex flex-wrap gap-3">
-              {/* <Link
-                href="/login"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium  shadow-sm transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-white dark:text-black"
-              >
-                Start your first battle — free
-              </Link> */}
-              <Button asChild variant="outline">
-                <Link href="/b/xK9m2p">Try the demo battle</Link>
-              </Button>
-            </div>
-
-            <div className="rounded-xl border border-border/70 bg-card/60 p-4">
-              <p className="text-sm font-medium text-foreground">
-                Live demo: Team Sweet vs Team Savoury
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Coffee + cake (£6) vs half sandwich, soup & drink (£8). Thu 3–5
-                PM. Scan the QR and back your team.
-              </p>
-            </div>
-          </div>
-
-          <WaitlistForm initialCount={waitlistCount} />
+          <section className="mt-8 grid gap-4 md:grid-cols-3">
+            {highlights.map((item) => (
+              <article key={item.title} className="rounded-[20px] border border-border/70 bg-card p-5 text-left shadow-sm">
+                <h2 className="text-lg font-semibold">{item.title}</h2>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.description}</p>
+              </article>
+            ))}
+          </section>
         </section>
 
-        <section className="grid gap-4 md:grid-cols-3">
-          {features.map((item) => (
-            <Card key={item.title} className="bg-card/80">
-              <CardHeader>
-                <CardTitle className="text-lg text-foreground">
-                  {item.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm leading-6 text-muted-foreground">
-                  {item.description}
+        <section className="mt-6 grid gap-5 lg:grid-cols-[1fr_0.9fr]">
+          <article className="rounded-[26px] border border-border/70 bg-card p-6 shadow-sm">
+            <h2 className="text-left text-xl font-semibold leading-8 sm:text-[1.35rem]">
+              Be among the first local businesses to use customer insight to test ideas and uncover
+              new opportunities for growth.
+            </h2>
+            <p className="mt-3 text-left text-sm leading-7 text-muted-foreground sm:text-base">
+              This version keeps the message focused and removes the extra badges, so the page feels
+              cleaner while still driving the same conversion action.
+            </p>
+
+            <div className="mt-6 grid gap-3">
+              {bullets.map((item) => (
+                <div
+                  key={item.title}
+                  className="flex gap-3 rounded-2xl border border-border/70 bg-background/70 p-4 text-left"
+                >
+                  <span className="mt-1 size-3 shrink-0 rounded-full bg-accent" />
+                  <div>
+                    <p className="font-semibold">{item.title}</p>
+                    <p className="mt-1 text-sm leading-6 text-muted-foreground">{item.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </article>
+
+          <aside>
+            <EarlyAccessForm />
+            <div className="mt-4 grid gap-3">
+              <div className="rounded-2xl border border-border/70 bg-card p-4 shadow-sm">
+                <p className="font-semibold">Test new ideas</p>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                  Menus, events, services and opening hours.
                 </p>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+              <div className="rounded-2xl border border-border/70 bg-card p-4 shadow-sm">
+                <p className="font-semibold">Learn faster</p>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                  Measure genuine demand before you spend.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-border/70 bg-card p-4 shadow-sm">
+                <p className="font-semibold">{waitlistCount} businesses on the waitlist</p>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                  Join the early access list and we&apos;ll keep you posted.
+                </p>
+              </div>
+            </div>
+          </aside>
         </section>
-
-        <section className="rounded-xl border border-border/70 bg-card/80 p-6 text-center">
-          <p className="text-sm text-muted-foreground">Freemium pricing</p>
-          <p className="mt-1 text-2xl font-bold text-foreground">
-            First battle free · then £19/battle
-          </p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {waitlistCount} businesses on the waitlist
-          </p>
-        </section>
-
-        <footer className="text-center text-xs text-muted-foreground">
-          <Link href="/login" className="underline">
-            Owner login
-          </Link>
-          {" · "}
-          <span>Privacy policy (coming soon)</span>
-        </footer>
       </div>
     </main>
   );

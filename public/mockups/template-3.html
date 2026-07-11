@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Landing Mockup 3 - Minimal Lead Gen</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #fbf8f2;
+        --panel: rgba(255, 255, 255, 0.85);
+        --text: #181818;
+        --muted: #626262;
+        --border: rgba(24, 24, 24, 0.12);
+        --primary: #111111;
+        --primary-text: #fbf8f2;
+        --accent: #7a5cff;
+        --accent-soft: rgba(122, 92, 255, 0.12);
+        --shadow: 0 26px 75px rgba(24, 24, 24, 0.14);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0d0d10;
+          --panel: rgba(18, 18, 23, 0.84);
+          --text: #f7f4ee;
+          --muted: #b0adb6;
+          --border: rgba(247, 244, 238, 0.1);
+          --primary: #f7f4ee;
+          --primary-text: #0d0d10;
+          --accent: #8f7cff;
+          --accent-soft: rgba(143, 124, 255, 0.14);
+          --shadow: 0 26px 75px rgba(0, 0, 0, 0.36);
+        }
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        background:
+          radial-gradient(circle at 80% 15%, var(--accent-soft), transparent 24%),
+          linear-gradient(180deg, var(--bg), color-mix(in srgb, var(--bg) 90%, var(--accent-soft)));
+        color: var(--text);
+      }
+
+      .shell {
+        max-width: 1160px;
+        margin: 0 auto;
+        padding: 28px 18px 40px;
+      }
+
+      .topline {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 22px;
+      }
+
+      .brand {
+        font-weight: 800;
+        letter-spacing: -0.03em;
+      }
+
+      .badge {
+        display: inline-flex;
+        padding: 8px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--panel);
+        color: var(--muted);
+        font-size: 0.84rem;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 20px;
+        align-items: start;
+      }
+
+      .left {
+        padding: 24px 0 0;
+      }
+
+      h1 {
+        margin: 16px 0 14px;
+        font-size: clamp(2.9rem, 6vw, 5.5rem);
+        line-height: 0.94;
+        letter-spacing: -0.07em;
+        max-width: 12ch;
+      }
+
+      .lede {
+        margin: 0;
+        max-width: 58ch;
+        color: var(--muted);
+        font-size: clamp(1.06rem, 1.45vw, 1.2rem);
+        line-height: 1.8;
+      }
+
+      .stack {
+        display: grid;
+        gap: 14px;
+        margin-top: 26px;
+      }
+
+      .row {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 15px 16px;
+        border-radius: 18px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+      }
+
+      .dot {
+        width: 12px;
+        height: 12px;
+        margin-top: 6px;
+        border-radius: 999px;
+        background: var(--accent);
+        flex: 0 0 auto;
+      }
+
+      .row strong, .row p { display: block; margin: 0; }
+      .row strong { margin-bottom: 4px; }
+      .row p { color: var(--muted); line-height: 1.55; }
+
+      .panel {
+        position: sticky;
+        top: 18px;
+        padding: 24px;
+        border-radius: 28px;
+        border: 1px solid var(--border);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+      }
+
+      .panel h2 {
+        margin: 0 0 12px;
+        font-size: 1.4rem;
+      }
+
+      .panel p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      label {
+        display: block;
+        margin-top: 18px;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      input {
+        width: 100%;
+        padding: 15px 16px;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        background: color-mix(in srgb, var(--panel) 74%, white);
+        color: var(--text);
+        font: inherit;
+      }
+
+      button {
+        width: 100%;
+        margin-top: 14px;
+        padding: 15px 18px;
+        border: 0;
+        border-radius: 16px;
+        background: var(--primary);
+        color: var(--primary-text);
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .fineprint {
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .spotlight {
+        margin-top: 18px;
+        padding: 16px;
+        border-radius: 20px;
+        background: color-mix(in srgb, var(--panel) 72%, var(--accent-soft));
+        border: 1px solid var(--border);
+      }
+
+      .spotlight strong {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .spotlight ul {
+        margin: 0;
+        padding-left: 1.1rem;
+        color: var(--muted);
+      }
+
+      .spotlight li { margin: 8px 0; line-height: 1.5; }
+
+      @media (max-width: 900px) {
+        .hero { grid-template-columns: 1fr; }
+        .panel { position: static; }
+        h1 { max-width: none; }
+      }
+
+      @media (max-width: 640px) {
+        .shell { padding-inline: 14px; }
+        .topline { flex-direction: column; align-items: flex-start; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="topline">
+        <div class="brand">MenuBattle</div>
+        <span class="badge">Minimal conversion page</span>
+      </div>
+
+      <main class="hero">
+        <section class="left">
+          <span class="badge">Built for local business early access</span>
+          <h1>Stop guessing. Your customers already know how your business could grow.</h1>
+          <p class="lede">
+            Test new menus, events, services and opening hours before you commit time and money.
+            Ask your customers what they want, measure genuine demand and discover which ideas are
+            most likely to bring in more revenue.
+          </p>
+
+          <div class="stack">
+            <div class="row">
+              <span class="dot"></span>
+              <div><strong>What customers are ready to buy</strong><p>Go straight to the offers that already have demand behind them.</p></div>
+            </div>
+            <div class="row">
+              <span class="dot"></span>
+              <div><strong>Best days, times and offers</strong><p>Use interest signals to decide when to launch, schedule or promote.</p></div>
+            </div>
+            <div class="row">
+              <span class="dot"></span>
+              <div><strong>Better business decisions</strong><p>Spend less on guesswork and more on the ideas that can pay back.</p></div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="panel">
+          <h2>Join the early access list.</h2>
+          <p>Be among the first local businesses to use customer insight to test ideas and uncover new opportunities for growth.</p>
+
+          <label for="email-3">Email address</label>
+          <input id="email-3" type="email" placeholder="you@example.com" />
+          <button type="button">Get Early Access</button>
+          <div class="fineprint">No spam. Just product updates and early access.</div>
+
+          <div class="spotlight">
+            <strong>What you can test first</strong>
+            <ul>
+              <li>New menus before changing stock orders</li>
+              <li>Events before booking suppliers</li>
+              <li>Services before hiring staff</li>
+              <li>Opening hours before changing rotas</li>
+            </ul>
+          </div>
+        </aside>
+      </main>
+    </div>
+  </body>
+</html>
