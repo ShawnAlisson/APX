@@ -131,3 +131,94 @@ a {
     --landing-accent-soft: rgba(94, 234, 212, 0.12);
   }
 }
+
+.demo-page {
+  --demo-bg: #120d0d;
+  --demo-panel: rgba(34, 24, 24, 0.72);
+  --demo-panel-strong: rgba(22, 16, 16, 0.88);
+  --demo-line: rgba(255, 255, 255, 0.1);
+  --demo-highlight: rgba(224, 170, 118, 0.22);
+  background:
+    radial-gradient(circle at top left, rgba(201, 132, 65, 0.22), transparent 28%),
+    radial-gradient(circle at 82% 12%, rgba(255, 218, 185, 0.12), transparent 18%),
+    linear-gradient(180deg, #1a1212 0%, #100b0b 52%, #0d0909 100%);
+}
+
+.demo-panel {
+  background: linear-gradient(180deg, rgba(38, 27, 27, 0.85), rgba(18, 13, 13, 0.9));
+  border: 1px solid var(--demo-line);
+  box-shadow: 0 22px 80px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(18px);
+}
+
+.demo-panel-soft {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.demo-fade-up {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: demo-fade-up 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.demo-float {
+  animation: demo-float 7s ease-in-out infinite;
+}
+
+.demo-hero-image {
+  animation: demo-kenburns 18s ease-out infinite alternate;
+}
+
+.demo-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.demo-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: -120%;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.18) 50%, transparent 70%);
+  transform: translateX(-32%);
+  animation: demo-shimmer 4.8s ease-in-out infinite;
+}
+
+@keyframes demo-fade-up {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes demo-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes demo-kenburns {
+  from {
+    transform: scale(1.02);
+  }
+
+  to {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes demo-shimmer {
+  0% {
+    transform: translateX(-40%) rotate(12deg);
+  }
+
+  100% {
+    transform: translateX(40%) rotate(12deg);
+  }
+}

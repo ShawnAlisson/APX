@@ -7,27 +7,27 @@ type FoodCatalogEntry = {
 
 const FOOD_CATALOG: FoodCatalogEntry[] = [
   {
-    imageUrl: "/food/strawberry-pancake.svg",
+    imageUrl: "/food/pics/joseph-gonzalez-zcUgjyqEwe8-unsplash.jpg",
     keywords: ["pancake", "waffle", "berry", "strawberry", "brunch"],
   },
   {
-    imageUrl: "/food/chocolate-brownie.svg",
+    imageUrl: "/food/pics/casey-lee-awj7sRviVXo-unsplash.jpg",
     keywords: ["brownie", "cookie", "chocolate", "sundae", "fudge"],
   },
   {
-    imageUrl: "/food/cheesecake-shake.svg",
+    imageUrl: "/food/pics/michele-blackwell-rAyCBQTH7ws-unsplash.jpg",
     keywords: ["cheesecake", "shake", "milkshake", "cream", "dessert", "lotus"],
   },
   {
-    imageUrl: "/food/loaded-burger.svg",
+    imageUrl: "/food/pics/khloe-arledge-ND3edEmzcdQ-unsplash.jpg",
     keywords: ["burger", "fries", "beef", "chicken burger", "loaded"],
   },
   {
-    imageUrl: "/food/pasta-bake.svg",
+    imageUrl: "/food/pics/alexandra-kusper-7MqA9uQZc2Y-unsplash.jpg",
     keywords: ["pasta", "lasagne", "gnocchi", "parmesan", "bake"],
   },
   {
-    imageUrl: "/food/deli-sandwich.svg",
+    imageUrl: "/food/pics/anh-nguyen-kcA-c3f_3FE-unsplash.jpg",
     keywords: ["sandwich", "toastie", "panini", "club", "wrap"],
   },
 ];

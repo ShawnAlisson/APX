@@ -12,9 +12,14 @@ export default function ScoreBar({ options, metrics }: ScoreBarProps) {
 
   return (
     <div className="sticky bottom-3 z-20 mx-auto w-full max-w-7xl px-4 pb-4 sm:px-6 lg:px-8">
-      <div className="rounded-2xl border border-border/70 bg-background/95 p-4 shadow-lg backdrop-blur">
-        <p className="mb-2 text-xs font-medium text-muted-foreground">Live battle score</p>
-        <div className="flex h-3 overflow-hidden rounded-full">
+      <div className="demo-panel rounded-[24px] px-4 py-4 text-white shadow-2xl sm:px-5">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/60">
+            Live demand
+          </p>
+          <p className="text-xs text-white/60">Updates every 5 seconds</p>
+        </div>
+        <div className="flex h-3 overflow-hidden rounded-full bg-white/10">
           {options.map((opt) => {
             const m = metrics.find((x) => x.optionId === opt.id);
             const pct = ((m?.battleScore ?? 0) / totalScore) * 100;
@@ -28,7 +33,7 @@ export default function ScoreBar({ options, metrics }: ScoreBarProps) {
             );
           })}
         </div>
-        <div className="mt-2 flex flex-wrap justify-between gap-2 text-xs">
+        <div className="mt-3 flex flex-wrap justify-between gap-2 text-xs">
           {options.map((opt) => {
             const m = metrics.find((x) => x.optionId === opt.id);
             return (
