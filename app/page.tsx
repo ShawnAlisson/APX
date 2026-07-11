@@ -35,17 +35,10 @@ export default async function Home() {
   const waitlistCount = await getWaitlistCount().catch(() => 0);
 
   return (
-    <main className="min-h-screen bg-background px-4 py-7 text-foreground sm:px-6">
+    <main className="landing-page min-h-screen px-4 py-7 text-foreground sm:px-6">
       <div className="mx-auto max-w-7xl">
-        <header className="mb-6 flex items-center justify-between gap-4">
-          <div className="font-semibold tracking-tight">MenuBattle</div>
-          <span className="inline-flex items-center rounded-full border border-border/70 bg-card px-3 py-2 text-sm text-muted-foreground">
-            Proof-first minimal v2
-          </span>
-        </header>
-
         <section className="mx-auto max-w-4xl text-center">
-          <h1 className="mx-auto max-w-3xl text-balance text-4xl font-bold tracking-tight sm:text-6xl">
+          <h1 className="mx-auto max-w-3xl text-balance text-5xl font-bold tracking-tight leading-[0.94] sm:text-[5.2rem]">
             Stop guessing. Your customers already know how your business could grow.
           </h1>
           <p className="mx-auto mt-4 max-w-4xl text-pretty text-lg leading-8 text-muted-foreground sm:text-xl">

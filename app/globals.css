@@ -114,3 +114,20 @@ a {
     @apply bg-background text-foreground;
   }
 }
+
+.landing-page {
+  --landing-bg: #f4f7fb;
+  --landing-panel: rgba(255, 255, 255, 0.8);
+  --landing-accent-soft: rgba(42, 157, 143, 0.12);
+  background:
+    radial-gradient(circle at 80% 12%, var(--landing-accent-soft), transparent 24%),
+    linear-gradient(180deg, var(--landing-bg), color-mix(in srgb, var(--landing-bg) 88%, var(--landing-accent-soft)));
+}
+
+@media (prefers-color-scheme: dark) {
+  .landing-page {
+    --landing-bg: #0b1117;
+    --landing-panel: rgba(14, 20, 27, 0.82);
+    --landing-accent-soft: rgba(94, 234, 212, 0.12);
+  }
+}
