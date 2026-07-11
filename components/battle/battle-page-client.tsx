@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -55,6 +56,10 @@ function getSessionToken() {
   return token;
 }
 
+function getBattleProgressKey(shortCode: string) {
+  return `mb_progress_${shortCode}`;
+}
+
 function Countdown({ deadline }: { deadline: string }) {
   const [remaining, setRemaining] = useState("");
 
@@ -106,6 +111,7 @@ function getNextFlowStep(current: BattleFlowStep, battle: PublicBattle): BattleF
 }
 
 export default function BattlePageClient({ shortCode }: { shortCode: string }) {
+  const searchParams = useSearchParams();
   const [stats, setStats] = useState<BattleStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedOption, setSelectedOption] = useState<BattleOption | null>(null);
@@ -119,6 +125,35 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
   const [submitting, setSubmitting] = useState(false);
   const [reviewClaimed, setReviewClaimed] = useState(false);
   const [error, setError] = useState("");
+
+  const saveBattleProgress = useCallback((optionId: string, stepValue: BattleFlowStep) => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(
+      getBattleProgressKey(shortCode),
+      JSON.stringify({ optionId, step: stepValue }),
+    );
+  }, [shortCode]);
+
+  const clearBattleProgress = useCallback(() => {
+    if (typeof window === "undefined") return;
+    localStorage.removeItem(getBattleProgressKey(shortCode));
+  }, [shortCode]);
+
+  const getStoredBattleProgress = useCallback(() => {
+    if (typeof window === "undefined" || !stats) return null;
+
+    const raw = localStorage.getItem(getBattleProgressKey(shortCode));
+    if (!raw) return null;
+
+    try {
+      const parsed = JSON.parse(raw) as { optionId?: string; step?: BattleFlowStep };
+      const option = stats.battle.options.find((item) => item.id === parsed.optionId);
+      if (!option) return null;
+      return { option, step: parsed.step ?? "vote" };
+    } catch {
+      return null;
+    }
+  }, [shortCode, stats]);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -135,6 +170,20 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
     const id = setInterval(fetchStats, 5000);
     return () => clearInterval(id);
   }, [fetchStats]);
+
+  useEffect(() => {
+    if (!stats || searchParams.get("paid") !== "1") return;
+
+    const progress = getStoredBattleProgress();
+    if (!progress) return;
+
+    const id = window.setTimeout(() => {
+      setSelectedOption(progress.option);
+      setStep("done");
+    }, 0);
+
+    return () => window.clearTimeout(id);
+  }, [getStoredBattleProgress, searchParams, stats]);
 
   async function submitLevel(
     commitmentLevel: "vote" | "registered" | "reserved" | "deposited",
@@ -161,6 +210,7 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to submit");
 
+      saveBattleProgress(selectedOption.id, commitmentLevel === "deposited" ? "done" : getNextFlowStep(step, stats.battle));
       setStep(commitmentLevel === "deposited" ? "done" : getNextFlowStep(step, stats.battle));
       fetchStats();
     } catch (err) {
@@ -170,15 +220,12 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
     }
   }
 
-  async function handleDemoDeposit() {
-    await submitLevel("deposited", { depositAmount: 1 });
-  }
-
   async function handleMollieDeposit() {
     if (!stats || !selectedOption) return;
     setSubmitting(true);
     setError("");
     try {
+      saveBattleProgress(selectedOption.id, "preorder");
       const redirectUrl = `${window.location.origin}/b/${shortCode}?paid=1`;
       const res = await fetch("/api/payments/mollie/create", {
         method: "POST",
@@ -285,6 +332,7 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                   onClick={() => {
                     setSelectedOption(opt);
                     setStep("vote");
+                    saveBattleProgress(opt.id, "vote");
                   }}
                   className="group flex h-full flex-col rounded-2xl border border-border/80 bg-card p-4 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg"
                   style={{ borderColor: opt.teamColor }}
@@ -466,13 +514,9 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                         Pay £1 with Mollie
                       </Button>
                     ) : (
-                      <Button className="w-full" onClick={handleDemoDeposit} disabled={submitting}>
-                        Pay £1 (demo checkout)
-                      </Button>
-                    )}
-                    {!mollieEnabled && (
-                      <p className="text-center text-xs text-muted-foreground">
-                        Demo mode — deposit recorded without real payment
+                      <p className="rounded-lg border border-dashed border-border/70 bg-muted/40 p-3 text-sm text-muted-foreground">
+                        Mollie checkout is not connected yet. Add a Mollie test API key to enable the
+                        real hosted checkout here.
                       </p>
                     )}
                     <Button variant="ghost" className="w-full text-xs" onClick={() => setStep("done")}>
@@ -527,6 +571,7 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                   onClick={() => {
                     setSelectedOption(null);
                     setStep("vote");
+                    clearBattleProgress();
                   }}
                 >
                   ← Pick a different team

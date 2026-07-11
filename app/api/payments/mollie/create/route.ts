@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { upsertResponse } from "@/lib/battles";
+import { getAppUrl } from "@/lib/app-url";
 import {
   createDepositPayment,
   getDepositAmount,
@@ -32,8 +33,23 @@ export async function POST(request: Request) {
       sessionToken: body.sessionToken,
     });
 
-    const origin = new URL(request.url).origin;
-    const webhookUrl = `${origin}/api/payments/mollie/webhook`;
+    const webhookUrl = process.env.MOLLIE_WEBHOOK_URL
+      ?? `${getAppUrl()}/api/payments/mollie/webhook`;
+
+    if (
+      webhookUrl.includes("localhost") ||
+      webhookUrl.includes("127.0.0.1") ||
+      webhookUrl.includes("0.0.0.0") ||
+      webhookUrl.includes("[::1]")
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Set MOLLIE_WEBHOOK_URL to a public URL (for example your Vercel or ngrok URL). Mollie cannot reach localhost.",
+        },
+        { status: 400 },
+      );
+    }
 
     const payment = await createDepositPayment({
       battleId: body.battleId,
