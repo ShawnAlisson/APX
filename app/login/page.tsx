@@ -54,7 +54,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#faf6f1] px-4 py-6 sm:px-6">
+    <main className="min-h-screen bg-background px-4 py-6 text-foreground sm:px-6">
       <div className="mx-auto grid min-h-[calc(100vh-3rem)] w-full max-w-6xl items-center gap-6 lg:grid-cols-[1.05fr_0.95fr]">
         <section className="grid gap-6">
           <div className="flex items-center justify-between">
@@ -64,14 +64,14 @@ export default function LoginPage() {
           </div>
           <div className="grid gap-4">
             <BadgeRow>
-              <span className="rounded-md bg-[#3d2914]/10 px-3 py-1 text-xs font-semibold text-[#3d2914]">
+              <span className="rounded-md bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground">
                 Owner login
               </span>
             </BadgeRow>
-            <h1 className="max-w-2xl text-4xl font-semibold text-[#3d2914] sm:text-5xl">
+            <h1 className="max-w-2xl text-4xl font-semibold text-foreground sm:text-5xl">
               Run menu experiments for your business
             </h1>
-            <p className="max-w-xl text-base leading-7 text-[#6b5344] sm:text-lg">
+            <p className="max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
               Create battles, share QR codes, and see live demand with break-even math.
               Customers join via public links — no account needed.
             </p>

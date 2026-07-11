@@ -51,7 +51,7 @@
 }
 
 html {
-  color-scheme: light;
+  color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {

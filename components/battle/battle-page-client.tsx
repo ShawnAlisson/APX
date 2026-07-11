@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -79,17 +79,13 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
   const [contactMethod, setContactMethod] = useState<"email" | "phone">("email");
   const [preferredTime, setPreferredTime] = useState(TIME_SLOTS[0]);
   const [consent, setConsent] = useState(false);
-  const [sessionToken, setSessionToken] = useState("");
+  const [sessionToken] = useState(() => getSessionToken());
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [reviewClaimed, setReviewClaimed] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    setSessionToken(getSessionToken());
-  }, []);
-
-  async function fetchStats() {
+  const fetchStats = useCallback(async () => {
     try {
       const res = await fetch(`/api/battles/public/${shortCode}`);
       const data = await res.json();
@@ -97,13 +93,13 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
     } finally {
       setLoading(false);
     }
-  }
+  }, [shortCode]);
 
   useEffect(() => {
     fetchStats();
     const id = setInterval(fetchStats, 5000);
     return () => clearInterval(id);
-  }, [shortCode]);
+  }, [fetchStats]);
 
   async function submitLevel(
     commitmentLevel: "vote" | "registered" | "reserved" | "deposited",
@@ -222,13 +218,13 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
     : null;
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#faf6f1]">
-      <header className="border-b bg-white/80 px-4 py-4 backdrop-blur">
-        <p className="text-xs font-medium uppercase tracking-wide text-[#6b5344]">
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
+      <header className="border-b border-border/70 bg-card/80 px-4 py-4 backdrop-blur">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {battle.business?.name ?? "MenuBattle"}
         </p>
-        <h1 className="mt-1 text-xl font-bold text-[#3d2914]">This week&apos;s MenuBattle</h1>
-        <p className="mt-1 text-sm text-[#6b5344]">{battle.question}</p>
+        <h1 className="mt-1 text-xl font-bold text-foreground">This week&apos;s MenuBattle</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{battle.question}</p>
         <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
           <Badge variant="outline">{battle.serviceDate} · {battle.serviceWindow}</Badge>
           <span>Closes in <Countdown deadline={battle.deadline} /></span>
@@ -244,13 +240,13 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                 key={opt.id}
                 type="button"
                 onClick={() => setSelectedOption(opt)}
-                className="w-full rounded-xl border-2 bg-white p-4 text-left shadow-sm transition hover:shadow-md"
+                className="w-full rounded-xl border-2 border-border bg-card p-4 text-left shadow-sm transition hover:shadow-md"
                 style={{ borderColor: opt.teamColor }}
               >
-                <p className="font-bold text-[#3d2914]" style={{ color: opt.teamColor }}>
+                <p className="font-bold" style={{ color: opt.teamColor }}>
                   {opt.name}
                 </p>
-                <p className="text-sm text-[#6b5344]">{opt.description}</p>
+                <p className="text-sm text-muted-foreground">{opt.description}</p>
                 <p className="mt-2 text-lg font-semibold">£{opt.price.toFixed(2)}</p>
                 <div className="mt-2 flex gap-4 text-xs text-muted-foreground">
                   <span>{m?.votes ?? 0} supporters</span>
@@ -261,7 +257,7 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
           })}
 
           {unlock && unlockOption && unlock.remaining > 0 && (
-            <p className="rounded-lg bg-white p-3 text-center text-sm text-[#3d2914]">
+            <p className="rounded-lg bg-card p-3 text-center text-sm text-foreground">
               <strong>{unlockOption.name}</strong> needs {unlock.remaining} more backers to unlock{" "}
               {battle.unlockBonus ?? "a bonus item"}!
             </p>
@@ -273,7 +269,7 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
             {STEPS.map((s, i) => (
               <div
                 key={s}
-                className={`h-1 flex-1 rounded-full ${i <= step ? "bg-[#9caf88]" : "bg-muted"}`}
+                className={`h-1 flex-1 rounded-full ${i <= step ? "bg-primary" : "bg-muted"}`}
               />
             ))}
           </div>
@@ -396,7 +392,7 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
 
               {done && (
                 <div className="space-y-3 text-center">
-                  <p className="font-semibold text-[#3d2914]">You&apos;re in!</p>
+                  <p className="font-semibold text-foreground">You&apos;re in!</p>
                   <p className="text-sm text-muted-foreground">
                     Your team needs you — share with friends to help {selectedOption.name} win.
                   </p>
@@ -419,7 +415,9 @@ export default function BattlePageClient({ shortCode }: { shortCode: string }) {
                         </Button>
                       )}
                       {reviewClaimed && (
-                        <p className="mt-1 text-xs text-green-700">Code REVIEW-SIDE claimed!</p>
+                        <p className="mt-1 text-xs text-green-700 dark:text-green-300">
+                          Code REVIEW-SIDE claimed!
+                        </p>
                       )}
                     </div>
                   )}

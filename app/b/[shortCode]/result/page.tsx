@@ -21,9 +21,9 @@ export default async function BattleResultPage({ params }: PageProps) {
 
   if (battle.status === "failed") {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#faf6f1] p-6 text-center">
+      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background p-6 text-center">
         <p className="text-sm text-muted-foreground">{battle.business?.name}</p>
-        <h1 className="text-2xl font-bold text-[#3d2914]">Battle did not reach minimum bookings</h1>
+        <h1 className="text-2xl font-bold text-foreground">Battle did not reach minimum bookings</h1>
         <p className="max-w-md text-sm text-muted-foreground">
           Neither team hit the {battle.minBookings} booking minimum. Your £1 deposit becomes café
           credit. Try next week&apos;s battle.
@@ -36,10 +36,10 @@ export default async function BattleResultPage({ params }: PageProps) {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-[#faf6f1] p-6">
+    <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-6">
       <div className="text-center">
         <p className="text-sm text-muted-foreground">{battle.business?.name}</p>
-        <h1 className="mt-2 text-3xl font-bold text-[#3d2914]">
+        <h1 className="mt-2 text-3xl font-bold text-foreground">
           {winner?.name ?? "Winner"} wins!
         </h1>
         <p className="mt-2 text-muted-foreground">

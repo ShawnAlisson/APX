@@ -42,9 +42,9 @@ export default function WaitlistForm({ initialCount = 0 }: WaitlistFormProps) {
 
   if (done) {
     return (
-      <Card className="border-[#9caf88]/40 bg-white/80">
+      <Card className="border-border/70 bg-card/80">
         <CardContent className="pt-6 text-center">
-          <p className="font-semibold text-[#3d2914]">You&apos;re on the list!</p>
+          <p className="font-semibold text-foreground">You&apos;re on the list!</p>
           <p className="mt-1 text-sm text-muted-foreground">
             {count} businesses have joined the waitlist.
           </p>
@@ -54,9 +54,9 @@ export default function WaitlistForm({ initialCount = 0 }: WaitlistFormProps) {
   }
 
   return (
-    <Card className="border-[#9caf88]/40 bg-white/80">
+    <Card className="border-border/70 bg-card/80">
       <CardHeader>
-        <CardTitle className="text-xl text-[#3d2914]">Join the business waitlist</CardTitle>
+        <CardTitle className="text-xl text-foreground">Join the business waitlist</CardTitle>
         <CardDescription>
           First battle free. {count > 0 && `${count} businesses already signed up.`}
         </CardDescription>
@@ -93,7 +93,7 @@ export default function WaitlistForm({ initialCount = 0 }: WaitlistFormProps) {
               placeholder="café, pub, salon..."
             />
           </div>
-          <Button type="submit" className="w-full bg-[#3d2914]" disabled={loading}>
+          <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Joining..." : "Join waitlist — first battle free"}
           </Button>
         </form>

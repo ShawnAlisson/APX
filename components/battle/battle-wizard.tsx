@@ -227,6 +227,15 @@ export default function BattleWizard() {
                   onChange={(e) => setStaffingCost(Number(e.target.value))}
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="wastageAllowance">Wastage allowance (£)</Label>
+                <Input
+                  id="wastageAllowance"
+                  type="number"
+                  value={wastageAllowance}
+                  onChange={(e) => setWastageAllowance(Number(e.target.value))}
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="availableHours">Available hours</Label>

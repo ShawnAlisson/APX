@@ -39,11 +39,11 @@ export default async function BattleDetailPage({ params }: PageProps) {
   const battleUrl = `${baseUrl}/b/${battle.shortCode}`;
 
   return (
-    <main className="min-h-screen bg-[#faf6f1] px-4 py-6 sm:px-6">
+    <main className="min-h-screen bg-background px-4 py-6 text-foreground sm:px-6">
       <div className="mx-auto grid w-full max-w-6xl gap-6">
-        <header className="flex items-center justify-between rounded-lg border bg-white/80 px-4 py-3">
+        <header className="flex items-center justify-between rounded-lg border border-border/70 bg-card/80 px-4 py-3">
           <div>
-            <p className="text-sm font-semibold text-[#3d2914]">MenuBattle</p>
+            <p className="text-sm font-semibold text-foreground">MenuBattle</p>
             <p className="text-xs text-muted-foreground">{battle.business?.name}</p>
           </div>
           <div className="flex gap-2">
@@ -60,7 +60,7 @@ export default async function BattleDetailPage({ params }: PageProps) {
           <Badge variant="secondary">{totalResponses} responses</Badge>
         </div>
 
-        <h1 className="text-2xl font-bold text-[#3d2914]">{battle.question}</h1>
+        <h1 className="text-2xl font-bold text-foreground">{battle.question}</h1>
 
         <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="space-y-4">
@@ -173,7 +173,7 @@ export default async function BattleDetailPage({ params }: PageProps) {
               </div>
               <div className="mt-3 h-3 overflow-hidden rounded-full bg-muted">
                 <div
-                  className="h-full rounded-full bg-[#9caf88]"
+                  className="h-full rounded-full bg-primary"
                   style={{
                     width: `${Math.min((breakEven.leadingBookings / breakEven.bookingsNeeded) * 100, 100)}%`,
                   }}

@@ -10,11 +10,11 @@ export default async function NewBattlePage() {
   if (!user) redirect("/login");
 
   return (
-    <main className="min-h-screen bg-[#faf6f1] px-4 py-6 sm:px-6">
+    <main className="min-h-screen bg-background px-4 py-6 text-foreground sm:px-6">
       <div className="mx-auto max-w-4xl space-y-6">
-        <header className="flex items-center justify-between rounded-lg border bg-white/80 px-4 py-3">
+        <header className="flex items-center justify-between rounded-lg border border-border/70 bg-card/80 px-4 py-3">
           <div>
-            <p className="text-sm font-semibold text-[#3d2914]">MenuBattle</p>
+            <p className="text-sm font-semibold text-foreground">MenuBattle</p>
             <p className="text-xs text-muted-foreground">Create a new battle</p>
           </div>
           <div className="flex gap-2">

@@ -15,15 +15,15 @@ export default async function DashboardPage() {
   const battles = await getBattlesByOwner(user.id);
 
   return (
-    <main className="min-h-screen bg-[#faf6f1] px-4 py-6 sm:px-6">
+    <main className="min-h-screen bg-background px-4 py-6 text-foreground sm:px-6">
       <div className="mx-auto grid w-full max-w-6xl gap-6">
-        <header className="flex items-center justify-between rounded-lg border bg-white/80 px-4 py-3">
+        <header className="flex items-center justify-between rounded-lg border border-border/70 bg-card/80 px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="size-9 rounded-md bg-[#3d2914] text-white grid place-items-center text-sm font-semibold">
+            <div className="grid size-9 place-items-center rounded-md bg-primary text-primary-foreground text-sm font-semibold">
               M
             </div>
             <div>
-              <p className="text-sm font-semibold text-[#3d2914]">MenuBattle</p>
+              <p className="text-sm font-semibold text-foreground">MenuBattle</p>
               <p className="text-xs text-muted-foreground">Signed in as {user.email}</p>
             </div>
           </div>
@@ -37,14 +37,14 @@ export default async function DashboardPage() {
 
         <section className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-[#3d2914]">Your battles</h1>
+            <h1 className="text-2xl font-bold text-foreground">Your battles</h1>
             <p className="text-sm text-muted-foreground">
               Create experiments, share QR codes, track demand.
             </p>
           </div>
           <div className="flex gap-2">
             <SeedDemoButton />
-            <Button asChild className="bg-[#3d2914]">
+            <Button asChild>
               <Link href="/dashboard/battles/new">Create battle</Link>
             </Button>
           </div>
